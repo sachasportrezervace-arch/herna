@@ -2,6 +2,10 @@
 
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
+## 2026-10-31 – Kvízové lodě hratelné (dd543d3)
+- `tools/stavy.cjs --zapis`: Kvízové lodě (Nafukovací flotila) „hraj“, sólo ověřené u všech 10 živých her; brzy jen Jamka na míru (404).
+- Lokálně `tests/herna.cjs` 243 PASS / 0 FAIL, exit 0. Živě první běh hned po nasazení 225/18 (neprozkoumáno, nejspíš nedonasazená CDN Pages), druhý běh 243 PASS / 0 FAIL, exit 0.
+
 ## 2026-10-31 – skutečné hry v živé místnosti (Čáranice, Ježkomet, Mlask!, Ovocný souboj)
 - **Hotovo:** `tests/mistnost-hry.cjs [hra ...] [URL Herny]` – hry `psanicko`, `caranice`, `jezci-prak`, `mlask`, `ovocny-souboj`; bez argumentu všechny postupně.
   Ostrá Herna + ostrá hra + ostrý mantledb (Mark Chromium 1440×900, Radka WebKit iPhone 13). Jen Ježkomet (`?test` pro JPT) a Ovocný souboj (`?kolo=10`) dostanou do holého dokumentu
