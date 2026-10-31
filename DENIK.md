@@ -3,7 +3,7 @@
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
 ## 2026-10-31 – místnost pro dva (#m=), protokol pro hry, Zkusit sám
-- **Hotovo (commit 30b8637, zatím nepushnuto):** `mistnost.js` = místnost `herna/#m=<id>` na mantledb `herna-<id>/mistnost`
+- **Hotovo (commit 30b8637, pushnuto s cf3b8a1):** `mistnost.js` = místnost `herna/#m=<id>` na mantledb `herna-<id>/mistnost`
   (jména, aktuální hra, skóre, posledních 30 partií, pojistka „Tohle je moje místnost, jsem Mark“, „Kdo tu hraje?“ pro třetí zařízení).
   Hra běží v iframe přes celou obrazovku s lištou (Místnost, název, skóre). Volba druhého hráče: karta „Mark chce hrát · Hra“ 1,6 s, pak hra.
   Uprostřed partie se přepnutí ptá. Hry bez protokolu: Herna čte hash výzvy v iframe (stejný origin) a pošle ho druhému.
@@ -12,7 +12,16 @@ PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíš
   Sólo teď: mlask, tancicky, psanicko, ctyrka-s-otockou. Nafukovací flotila (kvizove-lode) je nově „hraj“.
 - **Ověřeno lokálně:** `node tests/mistnost.cjs http://127.0.0.1:8807/` → 48 PASS, 0 FAIL; `node tests/herna.cjs http://127.0.0.1:8807/` → 203 PASS, 0 FAIL.
   Laťka „3 celé karty na iPhonu“ snížena na pás místnosti + 2 karty (SE: + 1), pás je nová hlavní cesta.
-- **Další krok:** design-eye „profi“ (rendery v tests/shots/mistnost-*.png), opravy, push, živý test obou testů, sem výsledek.
+- **Design-eye (3 kola, subagent design-eye):** kolo 1 „OK s výhradami“ (1 HIGH, 2 MEDIUM), kolo 2 „OK s výhradami“ (1 HIGH, 1 MEDIUM), kolo 3 „NE PROFI“ kvůli jedinému HIGH (odkaz Trénink na kartě useknutý).
+  Čtvrté kolo se kvůli limitu 3 kol nespouštělo: poslední HIGH jsem opravil odstraněním odkazu z karty a ověřil vlastním renderem (karty čisté) a testem. **Verdikt „profi“ od design-eye tedy formálně nemám.**
+- **Opraveno (commit cf3b8a1):** „Zkusit sám“ (mužský tvar) → „Trénink bez soupeře“ jen v panelu Pravidla; jména u skóre neposkakují (štítek „ty“ rezervuje řádek);
+  16znaková jména nerozšíří hlavičku na desktopu (grid `minmax(0,1fr)`, test hlídá šířku); lišta hry na mobilu bez názvu hry, skóre vpravo;
+  čekání na hru: tlačítko „Nečekat a založit výzvu“ až po 12 s s rezervovaným místem, vyvážený nadpis, čitelnější tečky; odznak „Teď hrajete“ z karty pryč;
+  „Naposledy před chvílí“; adresa v pozvánce v písmu Herny; boční panel na desktopu začíná nahoře; snímky v testu až po dojetí animace, nový snímek třetího zařízení.
+- **Lokálně po opravách:** `node tests/mistnost.cjs http://127.0.0.1:8807/` → 49 PASS, 0 FAIL, exit 0; `node tests/herna.cjs http://127.0.0.1:8807/` → 243 PASS, 0 FAIL, exit 0.
+- **Živě (Pages build cf3b8a1 = built):** `node tests/mistnost.cjs` → 49 PASS, 0 FAIL, exit 0; `node tests/herna.cjs` → 243 PASS, 0 FAIL, exit 0.
+- **NEOVĚŘENO:** reálný iPhone (Safari, plocha, dotyk, klávesnice při zadávání jmen), skutečné hry s protokolem (zatím jen makety; staré hry jen přes přepsání hashe),
+  iPhone SE a desktop 1280 v liště hry s dlouhými jmény, klávesnice a reduced motion v místnosti, chování mantledb při výpadku sítě.
 
 ## 2026-10-31 – nové živé hry
 - Polštářovka → **Mlask!**: id `mlask` (nové repo, stará adresa přesměrovává), nový twist a pravidla s tajnou obranou, nová ikona dílku dortu.
