@@ -47,6 +47,14 @@
       '<path d="M10 14 Q32 20 54 14 Q48 32 54 50 Q32 44 10 50 Q16 32 10 14 Z" fill="#f4f0ff" ' + S + '/>' +
       '<path d="M22 28 l5 3 l-5 3 M42 28 l-5 3 l5 3" fill="none" ' + S + '/>' +
       '<path d="M27 41 q5 -4 10 0" fill="none" ' + S + '/>',
+    // dílek dortu s třešní (Mlask!)
+    dort:
+      '<path d="M8 30 H58 V52 H8 Z" fill="#f2c27a" ' + S + '/>' +
+      '<path d="M10 42 H56" stroke="#e85a7a" stroke-width="4"/>' +
+      '<path d="M8 30 L44 17 L58 30 Z" fill="#fff8ee" ' + S + '/>' +
+      '<path d="M8 30 H58 V34 Q55 39 51 34 Q46 40 41 34 Q36 38 31 34 Q25 40 20 34 Q14 39 8 35 Z" fill="#fff8ee" ' + S + '/>' +
+      '<path d="M43 14 q2 -6 8 -8" fill="none" ' + S + '/>' +
+      '<circle cx="43" cy="17" r="5.5" fill="#e04a4a" ' + S + '/>',
     // tančík
     tank:
       '<rect x="8" y="38" width="48" height="14" rx="7" fill="#4a4f4a" ' + S + '/>' +

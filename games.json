@@ -62,18 +62,18 @@
       ]
     },
     {
-      "id": "polstarovka",
-      "nazev": "Polštářovka",
-      "twist": "Bitva přes ulici ve větru: polštáře, vodní balónky, dort a triky.",
-      "ikona": "polstar",
+      "id": "mlask",
+      "nazev": "Mlask!",
+      "twist": "Bitva přes ulici: házíš polštáře i dort a po každém hodu tajně volíš, jak uhneš.",
+      "ikona": "dort",
       "barva": "#b9a8ec",
       "typ": "tahová",
       "delka": "~10 min",
       "stav": "hraj",
       "pravidla": [
         "Střídáte se v hodech přes ulici. Úhel a sílu nastavíš tažením, vítr fouká pokaždé jinak.",
-        "Vybíráš, čím hodíš, a každý trik (deštník, bezvětří, dvojhod…) máš jen jednou za hru.",
-        "Kdo první spadne na nulu, prohrál. Po 40 hodech vyhrává ten, komu zbylo víc."
+        "Po svém hodu tajně zvolíš, jak uhneš před dalším soupeřovým: přikrčit, uskočit, nebo chytit. Každá obrana platí na jiné hody.",
+        "Kdo první spadne na nulu životů, prohrál."
       ]
     },
     {
@@ -144,7 +144,7 @@
       "barva": "#f7d36b",
       "typ": "tahová",
       "delka": "~5 min",
-      "stav": "brzy",
+      "stav": "hraj",
       "pravidla": [
         "Házíte žetony do sloupců, vyhrává čtyři v řadě vodorovně, svisle nebo šikmo.",
         "Jednou za partii můžeš místo tahu otočit celou desku o 90°.",
@@ -159,7 +159,7 @@
       "barva": "#f4b3a0",
       "typ": "živá",
       "delka": "~10 min",
-      "stav": "brzy",
+      "stav": "hraj",
       "pravidla": [
         "Jeden kreslí, druhý hádá, pak se vystřídáte.",
         "Kreslíř si před kreslením vsadí, za kolik vteřin soupeř obrázek uhodne.",

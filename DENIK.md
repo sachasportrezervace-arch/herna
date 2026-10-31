@@ -2,6 +2,11 @@
 
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
+## 2026-10-31 – nové živé hry
+- Polštářovka → **Mlask!**: id `mlask` (nové repo, stará adresa přesměrovává), nový twist a pravidla s tajnou obranou, nová ikona dílku dortu.
+- `tools/stavy.cjs --zapis`: hraj nově Čtyřka s otočkou a Čáranice (Kafíčka po pushi cf776e9 se načtou). Brzy zůstávají Kvízové lodě a Jamka na míru (404).
+- Lokálně `node tests/herna.cjs http://127.0.0.1:8807/` → 150 PASS, 0 FAIL, exit 0.
+
 ## 2026-10-31 – dokončení a nasazení (session na účtu P, převzato po `d14c4a27`)
 - **Hotovo:**
   - Návrh B „večerní automat“ (design-eye kolo 1: lepší, ale nebyl profi) dotažený: kompaktní mobilní karta (text a ikona nahoře, typ, délka, Pravidla a Hraj v řádku), na iPhonu 390×664 jsou vidět 3 celé karty.
