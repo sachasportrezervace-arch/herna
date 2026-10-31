@@ -14,14 +14,33 @@ function check(name, cond, info) {
   if (cond) { ok++; console.log("  PASS", name); } else { fail++; console.log("  FAIL", name, info === undefined ? "" : JSON.stringify(info)); }
 }
 
+function innerHeightOf(ctxOpts) { return (ctxOpts.viewport || {}).height || 0; }
+
 async function stavyHer(request) {
   const out = {};
   for (const h of hryJson.hry) {
     const url = hryJson.zaklad + h.id + "/";
     const r = await request.fetch(url, { method: "HEAD" }).catch(() => null);
-    out[h.id] = { url, status: r ? r.status() : 0 };
+    out[h.id] = { url, status: r ? r.status() : 0, hraj: h.stav === "hraj" };
   }
   return out;
+}
+
+// Každá hra se stavem „hraj“ se musí opravdu načíst: HTTP 200, žádná chyba JS, něco se vykreslí.
+async function hrySeNactou(browser, stavy) {
+  console.log("\nhry se stavem hraj se načtou");
+  for (const [id, s] of Object.entries(stavy)) {
+    if (!s.hraj) continue;
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const page = await ctx.newPage();
+    const chyby = [];
+    page.on("pageerror", (e) => chyby.push(e.message));
+    const r = await page.goto(s.url, { waitUntil: "load", timeout: 30000 }).catch(() => null);
+    await page.waitForTimeout(2000);
+    const vidi = await page.evaluate(() => [...document.querySelectorAll("body *")].some((el) => { const b = el.getBoundingClientRect(); return b.width > 40 && b.height > 40; })).catch(() => false);
+    check(`${id} se načte (HTTP ${r ? r.status() : 0}, bez chyby JS, vykreslí se)`, r && r.status() === 200 && chyby.length === 0 && vidi, chyby);
+    await ctx.close();
+  }
 }
 
 async function scenar(browser, nazev, ctxOpts, stavy) {
@@ -35,12 +54,22 @@ async function scenar(browser, nazev, ctxOpts, stavy) {
   await page.goto(URL_, { waitUntil: "networkidle" });
   await page.waitForTimeout(800);
   const karty = await page.$$eval(".hra", (l) => l.map((li) => ({ id: li.dataset.id, brzy: li.classList.contains("je-brzy"), href: (li.querySelector("a.hra-odkaz") || {}).href || null })));
-  check("8 karet podle games.json", karty.length === hryJson.hry.length, karty.length);
+  check(`${hryJson.hry.length} karet podle games.json`, karty.length === hryJson.hry.length, karty.length);
   for (const k of karty) {
     const s = stavy[k.id];
-    const maBytHratelna = s.status === 200;
-    check(`${k.id}: stav odpovídá HTTP ${s.status}`, maBytHratelna === !k.brzy, k);
+    const maBytHratelna = s.hraj && s.status === 200;
+    check(`${k.id}: „${k.brzy ? "brzy" : "hraj"}“ odpovídá games.json + HTTP ${s.status}`, maBytHratelna === !k.brzy, k);
     if (!k.brzy) check(`${k.id}: odkaz vede na ${s.url}`, k.href === s.url, k.href);
+  }
+  const prvniBrzy = karty.findIndex((k) => k.brzy);
+  check("hratelné hry jsou napřed", prvniBrzy === -1 || karty.slice(prvniBrzy).every((k) => k.brzy), karty.map((k) => k.id));
+  const mobil = (ctxOpts.viewport || {}).width < 600;
+  const plocha = await page.evaluate(() => !document.getElementById("plocha").hidden);
+  check(mobil ? "iPhone: nápověda Přidat na plochu je vidět" : "desktop: nápověda Přidat na plochu skrytá", plocha === mobil, plocha);
+  if (mobil) {
+    const celych = await page.$$eval(".hra", (l) => l.filter((li) => li.getBoundingClientRect().bottom <= innerHeight).length);
+    const minimum = innerHeightOf(ctxOpts) >= 660 ? 3 : 2;
+    check(`první obrazovka: aspoň ${minimum} celé karty`, celych >= minimum, celych);
   }
   await page.screenshot({ path: `${SHOTS}/${nazev}.png` });
   await page.screenshot({ path: `${SHOTS}/${nazev}-cela.png`, fullPage: true });
@@ -79,7 +108,11 @@ async function scenar(browser, nazev, ctxOpts, stavy) {
 
   // klik do hry + naposledy hráno
   const cil = karty.filter((k) => !k.brzy)[1] || prvni;
-  await Promise.all([page.waitForURL((u) => u.href.startsWith(stavy[cil.id].url), { timeout: 20000 }), page.click(`.hra[data-id="${cil.id}"] .hra-twist`)]);
+  // Klik prstem doprostřed popisku: odkaz z názvu je přes ::after roztažený na celou kartu.
+  const twist = page.locator(`.hra[data-id="${cil.id}"] .hra-twist`);
+  await twist.scrollIntoViewIfNeeded();
+  const bod = await twist.boundingBox();
+  await Promise.all([page.waitForURL((u) => u.href.startsWith(stavy[cil.id].url), { timeout: 20000 }), page.mouse.click(bod.x + bod.width / 2, bod.y + bod.height / 2)]);
   check(`klik na kartu otevře ${cil.id}`, page.url().startsWith(stavy[cil.id].url), page.url());
   await page.goBack({ waitUntil: "networkidle" });
   await page.waitForTimeout(800);
@@ -119,11 +152,7 @@ async function bezSite(browser) {
     const r = await req.get(new URL(f, URL_).href);
     check(`${f} 200`, r.status() === 200, r.status());
   }
-  for (const [id, s] of Object.entries(stavy)) {
-    if (s.status !== 200) continue;
-    const r = await req.get(s.url);
-    check(`hra ${id} odpovídá 200 i na GET`, r.status() === 200, r.status());
-  }
+  await hrySeNactou(ch, stavy);
 
   await scenar(ch, "desktop-chromium-1280", { viewport: { width: 1280, height: 800 } }, stavy);
   await scenar(ch, "desktop-chromium-1440", { viewport: { width: 1440, height: 900 } }, stavy);

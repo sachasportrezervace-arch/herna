@@ -40,10 +40,10 @@
       '<div class="hra-text">' + naposledy +
       '<h2 class="hra-nazev">' + nazev + "</h2>" +
       '<p class="hra-twist">' + esc(h.twist) + "</p>" +
+      "</div>" +
       '<div class="hra-meta"><span class="hra-typ hra-typ-' + (h.typ === "živá" ? "ziva" : "tahova") + '">' + esc(h.typ) + "</span>" +
       '<span class="hra-delka">' + esc(h.delka) + "</span>" +
       '<button class="hra-pravidla" type="button" data-pravidla="' + esc(h.id) + '" aria-label="Pravidla: ' + esc(h.nazev) + '">Pravidla</button></div>' +
-      "</div>" +
       (hraj
         ? '<span class="hra-akce" aria-hidden="true">Hraj<svg><use href="#i-sipka"/></svg></span>'
         : '<span class="hra-akce hra-brzy">Brzy</span>') +
@@ -53,18 +53,19 @@
 
   function vykresli() {
     var posl = nactiNaposledy();
-    seznam.innerHTML = hry.map(function (h) { return karta(h, posl); }).join("");
+    // Hratelné napřed, jinak pořadí z games.json.
+    var serazene = hry.filter(function (h) { return h.stav === "hraj"; })
+      .concat(hry.filter(function (h) { return h.stav !== "hraj"; }));
+    seznam.innerHTML = serazene.map(function (h) { return karta(h, posl); }).join("");
   }
 
-  // Dostupnost: hra „brzy“ se odemkne, když její stránka vrací 200; živá hra s 404 se zamkne.
-  // Bez sítě (nebo když HEAD nejde) zůstává hodnota z games.json.
+  // Pojistka: hra „hraj“, jejíž stránka vrací 404, se zamkne. Odemyká jen games.json
+  // (tools/stavy.cjs ověří, že se hra opravdu načte). Bez sítě platí hodnota z games.json.
   function overDostupnost() {
     hry.forEach(function (h) {
+      if (h.stav !== "hraj") return;
       fetch(h.url, { method: "HEAD", cache: "no-store" })
-        .then(function (r) {
-          var novy = r.ok ? "hraj" : r.status === 404 ? "brzy" : h.stav;
-          if (novy !== h.stav) { h.stav = novy; vykresli(); }
-        })
+        .then(function (r) { if (r.status === 404) { h.stav = "brzy"; vykresli(); } })
         .catch(function () {});
     });
   }
@@ -105,6 +106,11 @@
     if (a) ulozNaposledy(a.getAttribute("data-id"));
   });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") zavriPanel(); });
+
+  // Na iPhonu v Safari nápověda, jak si Hernu dát na plochu (v režimu z plochy se neukáže).
+  var plocha = document.getElementById("plocha");
+  var ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  if (plocha && ios && !navigator.standalone && !matchMedia("(display-mode: standalone)").matches) plocha.hidden = false;
 
   fetch(zdroj, { cache: "no-cache" })
     .then(function (r) { return r.json(); })

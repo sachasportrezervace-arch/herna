@@ -69,7 +69,7 @@
       "barva": "#b9a8ec",
       "typ": "tahová",
       "delka": "~10 min",
-      "stav": "brzy",
+      "stav": "hraj",
       "pravidla": [
         "Střídáte se v hodech přes ulici. Úhel a sílu nastavíš tažením, vítr fouká pokaždé jinak.",
         "Vybíráš, čím hodíš, a každý trik (deštník, bezvětří, dvojhod…) máš jen jednou za hru.",
@@ -84,7 +84,7 @@
       "barva": "#8fc7c0",
       "typ": "tahová",
       "delka": "~15 min",
-      "stav": "brzy",
+      "stav": "hraj",
       "pravidla": [
         "Nastav úhel a sílu, vystřel a trefuj soupeřův tank v kopcovitém terénu.",
         "Kolik životů soupeři ubereš, tolik dostaneš mincí. Před kolem za ně nakoupíš zbraně a vylepšení.",

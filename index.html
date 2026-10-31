@@ -20,31 +20,36 @@
 :root{--night:#1c2140;--night2:#272e55;--paper:#fff7ea;--ink:#231f1c;--mut:#c3c8e6;--hot:#ffb23f}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--night);color:var(--paper);font:400 16px/1.4 "Bricolage Grotesque",system-ui,sans-serif}
+body{margin:0;background:var(--night);color:var(--paper);font:400 16px/1.4 "Bricolage Grotesque",system-ui,sans-serif;font-variation-settings:"opsz" 14}
 h1,h2,p{margin:0}
-.scena{position:relative;padding:calc(20px + env(safe-area-inset-top)) 20px 0;overflow:hidden}
-.scena h1{font-size:46px;line-height:.9;font-weight:800;letter-spacing:-.03em}
-.scena p{margin-top:8px;font-size:15px;max-width:20ch;color:var(--mut)}
-.scena-text{position:relative;z-index:2}
-.dvojice{display:block;position:absolute;right:6px;bottom:4px;width:172px;height:99px;z-index:0}
-.scena{min-height:calc(150px + env(safe-area-inset-top))}
-.scena::after{content:"";position:absolute;left:0;right:0;bottom:0;z-index:1;height:18px;background:var(--hot);border-top:3px solid var(--ink)}
-.hry{list-style:none;margin:0;padding:18px 16px calc(28px + env(safe-area-inset-bottom));display:grid;gap:14px}
-.hra{position:relative;display:grid;grid-template-columns:1fr 78px;grid-template-rows:auto 1fr;column-gap:12px;row-gap:10px;padding:16px;background:var(--c);color:var(--ink);border:3px solid var(--ink);border-radius:22px}
+/* Optickou velikost písma nastavujeme ručně: automatika v WebKitu bere u textu displejový řez a slévá písmena. */
+.scena h1{font-variation-settings:"opsz" 96}
+.hra-nazev,.panel-nazev{font-variation-settings:"opsz" 32}
+.scena{position:relative;padding:calc(18px + env(safe-area-inset-top)) 20px 0;overflow:hidden}
+.scena h1{font-size:44px;line-height:.9;font-weight:800;letter-spacing:-.03em}
+.scena p{margin-top:8px;font-size:14.5px;max-width:19ch;color:var(--mut)}
+.scena-text{position:relative;z-index:2;padding-bottom:30px}
+.jen-desktop{display:none}
+.dvojice{display:block;position:absolute;right:4px;bottom:6px;width:164px;height:95px;z-index:0}
+.scena{min-height:calc(138px + env(safe-area-inset-top))}
+.scena::after{content:"";position:absolute;left:0;right:0;bottom:0;z-index:1;height:16px;background:var(--hot);border-top:3px solid var(--ink)}
+.hry{list-style:none;margin:0;padding:14px 14px calc(24px + env(safe-area-inset-bottom));display:grid;gap:12px}
+/* Mobil: text a ikona nahoře, pod nimi typ, délka, Pravidla a Hraj v jednom řádku. */
+.hra{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"text ikona" "meta akce";column-gap:12px;row-gap:8px;padding:13px 14px 12px;background:var(--c);color:var(--ink);border:3px solid var(--ink);border-radius:22px}
 .hra:has(.hra-odkaz:focus-visible){outline:3px solid var(--hot);outline-offset:4px}
-.hra-ikona{grid-column:2;grid-row:1;width:78px;height:78px;display:grid;place-items:center;background:var(--paper);border:3px solid var(--ink);border-radius:50%}
-.hra-ikona svg{width:60px;height:60px}
-.hra-text{grid-column:1;grid-row:1/3;min-width:0}
-.hra-posl{display:inline-block;font-size:12.5px;font-weight:800;background:var(--ink);color:var(--paper);padding:2px 8px;border-radius:999px;margin-bottom:6px}
-.hra-nazev{font-size:23px;line-height:1.05;font-weight:800;letter-spacing:-.01em}
+.hra-ikona{grid-area:ikona;justify-self:end;width:62px;height:62px;display:grid;place-items:center;background:var(--paper);border:3px solid var(--ink);border-radius:50%}
+.hra-ikona svg{width:48px;height:48px}
+.hra-text{grid-area:text;min-width:0}
+.hra-posl{display:inline-block;font-size:12px;font-weight:800;background:var(--ink);color:var(--paper);padding:2px 8px;border-radius:999px;margin-bottom:5px}
+.hra-nazev{font-size:21px;line-height:1.05;font-weight:800;letter-spacing:-.01em}
 .hra-odkaz{color:inherit;text-decoration:none;outline:none}
 .hra-odkaz::after{content:"";position:absolute;inset:0;border-radius:20px}
-.hra-twist{margin-top:6px;font-size:15px;line-height:1.35}
-.hra-meta{display:flex;align-items:center;gap:10px;white-space:nowrap;margin-top:10px;font-size:13px;font-weight:700}
+.hra-twist{margin-top:4px;font-size:14px;line-height:1.32}
+.hra-meta{grid-area:meta;display:flex;align-items:center;gap:9px;white-space:nowrap;font-size:13px;font-weight:700;min-width:0}
 .hra-typ{padding:3px 9px;border-radius:999px;background:var(--ink);color:var(--paper)}
 .hra-typ-ziva{background:#e8473c;color:#fff}
-.hra-pravidla{position:relative;z-index:2;margin:-10px 0 -10px auto;min-height:44px;padding:0 4px;border:0;background:none;font:inherit;font-weight:800;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.hra-akce{grid-column:2;grid-row:2;align-self:end;display:flex;align-items:center;justify-content:center;gap:4px;min-height:44px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:15px;font-weight:800}
+.hra-pravidla{position:relative;z-index:2;margin:-6px 0 -6px auto;min-height:44px;padding:0 6px;border:0;background:none;font:inherit;font-weight:800;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.hra-akce{grid-area:akce;display:flex;align-items:center;justify-content:center;gap:4px;min-height:44px;padding:0 14px 0 16px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:15px;font-weight:800}
 .hra-akce svg{width:18px;height:18px}
 .je-brzy{background:var(--night2);color:var(--mut);border-color:#5a64a0;border-style:dashed}
 .je-brzy .hra-ikona{background:#343c6c;border-color:#6f78b0;filter:saturate(.45)}
@@ -54,6 +59,7 @@ h1,h2,p{margin:0}
 .hra-brzy{background:transparent;border:2px dashed #8a93c8;color:var(--paper);font-size:14px}
 .chyba{padding:20px;font-weight:600}
 .pata{padding:0 20px calc(24px + env(safe-area-inset-bottom));font-size:13px;color:var(--mut)}
+.pata-plocha{margin-top:8px;color:var(--paper);font-weight:600}
 .panel{position:fixed;inset:0;z-index:10;color:var(--ink)}
 .panel-pozadi{position:absolute;inset:0;background:rgba(10,12,28,.6);opacity:0;transition:opacity .2s}
 .panel-list{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-top:3px solid var(--ink);border-radius:26px 26px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .22s ease-out;max-height:85vh;overflow:auto}
@@ -73,18 +79,19 @@ h1,h2,p{margin:0}
   .scena{min-height:0;max-width:1240px;margin:0 auto;padding:48px 40px 0;display:grid;grid-template-columns:1fr 420px;grid-template-areas:"t d" "pult pult";overflow:visible}
   .dvojice{grid-area:d;align-self:end}
   .scena h1{font-size:104px}
-  .scena-text{grid-area:t;align-self:end}
+  .scena-text{grid-area:t;align-self:end;padding-bottom:0}
+  .jen-desktop{display:inline}
   .scena p{font-size:21px;max-width:26ch;margin-bottom:48px}
   .dvojice{position:relative;right:auto;bottom:auto;width:360px;height:208px;margin:0 0 -6px;justify-self:end}
   .scena::after{position:relative;grid-area:pult;margin:0 -40px;height:22px}
   main{max-width:1240px;margin:0 auto}
   .hry{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;padding:28px 40px 40px}
-  .hra{grid-template-columns:1fr auto;grid-template-rows:auto 1fr;padding:18px}
-  .hra-ikona{grid-column:1;grid-row:1;width:84px;height:84px}
-  .hra-text{grid-column:1/3;grid-row:2}
-  .hra-akce{grid-column:2;grid-row:1;align-self:start;padding:0 14px 0 16px}.hra-ikona svg{width:64px;height:64px}
-  .hra-text{display:flex;flex-direction:column}
-  .hra-meta{margin-top:auto;padding-top:12px}
+  .hra{grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto;grid-template-areas:"ikona akce" "text text" "meta meta";row-gap:12px;padding:18px}
+  .hra-ikona{justify-self:start;width:84px;height:84px}
+  .hra-ikona svg{width:64px;height:64px}
+  .hra-akce{align-self:start}
+  .hra-nazev{font-size:23px}
+  .hra-twist{margin-top:6px;font-size:15px;line-height:1.35}
   .hra:not(.je-brzy):hover{transform:translateY(-3px)}
   .hra-odkaz:hover{text-decoration:underline}
   .pata{max-width:1240px;margin:0 auto;padding:0 40px 36px}
@@ -97,14 +104,17 @@ h1,h2,p{margin:0}
   <header class="scena">
     <div class="scena-text">
       <h1>Herna</h1>
-      <p>Hry pro dva na jednom odkazu. Vyber hru, založ výzvu a pošli ji.</p>
+      <p>Hry pro dva na jednom odkazu.<span class="jen-desktop"> Vyber hru, založ výzvu a pošli ji.</span></p>
     </div>
     <svg class="dvojice" viewBox="0 0 260 150" role="img" aria-label="Kluk a holka čelo na čele"><use href="#i-dvojice"/></svg>
       </header>
   <main>
     <ul id="hry" class="hry"></ul>
   </main>
-  <p class="pata">Hra se zakládá až uvnitř. Odkaz s výzvou pak pošleš do chatu.</p>
+  <footer class="pata">
+    <p>Hra se zakládá až uvnitř. Odkaz s výzvou pak pošleš do chatu.</p>
+    <p id="plocha" class="pata-plocha" hidden>Na iPhonu dej Sdílet a Přidat na plochu. Herna se pak otevře přes celou obrazovku.</p>
+  </footer>
 </div>
 <div id="panel" class="panel" hidden role="dialog" aria-modal="true" aria-labelledby="panel-nazev">
   <div class="panel-pozadi" data-zavri></div>
