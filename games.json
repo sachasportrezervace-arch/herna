@@ -1,0 +1,170 @@
+{
+  "zaklad": "https://sachasportrezervace-arch.github.io/",
+  "hry": [
+    {
+      "id": "kaficka",
+      "nazev": "Kafíčka",
+      "twist": "Quarto s hrnky: hrnek si nevybíráš, podá ti ho soupeř.",
+      "ikona": "kaficka",
+      "barva": "#f4c27a",
+      "typ": "tahová",
+      "delka": "~10 min",
+      "stav": "hraj",
+      "pravidla": [
+        "Na desce 4 × 4 skládáte hrnky. Každý je velký nebo malý, espresso nebo latte, kulatý nebo hranatý, s pěnou nebo bez.",
+        "Vyhrává, kdo položí čtvrtý hrnek do řady, kde mají všechny aspoň jednu věc společnou.",
+        "Hrnek, který položíš, ti ale vybral soupeř. A ty pak vybíráš jemu."
+      ]
+    },
+    {
+      "id": "zviratka-sogi",
+      "nazev": "Zvířátkové šógi",
+      "twist": "Malé japonské šógi: sebrané zvíře přeběhne k tobě a vrátíš ho do hry, kam chceš.",
+      "ikona": "sogi",
+      "barva": "#9ccf73",
+      "typ": "tahová",
+      "delka": "~10 min",
+      "stav": "hraj",
+      "pravidla": [
+        "Deska 3 × 4, každý má lva, žirafu, slona a kuřátko. Každé zvíře jde o jedno pole po svém.",
+        "Sebrané zvíře je tvoje a místo tahu ho můžeš položit na volné pole.",
+        "Vyhraješ, když chytíš soupeřova lva, nebo když tvůj lev v klidu doběhne na druhý konec."
+      ]
+    },
+    {
+      "id": "jezci-prak",
+      "nazev": "Ježkomet",
+      "twist": "Střílíš ježka z praku na soupeřovu pevnost. Jakého ježka dostaneš, vybírá soupeř.",
+      "ikona": "jezek",
+      "barva": "#e9a46a",
+      "typ": "tahová",
+      "delka": "~10 min",
+      "stav": "hraj",
+      "pravidla": [
+        "Natáhni prak, pusť a shoď z pevnosti soupeřovy tři postavičky.",
+        "Po výstřelu vybereš, čím střílí soupeř: obyčejným, kamenným, gumovým, nebo bouchacím ježkem.",
+        "Vyhrává, kdo první vyřadí všechny tři."
+      ]
+    },
+    {
+      "id": "ovocny-souboj",
+      "nazev": "Ovocný souboj",
+      "twist": "Sekáte stejné ovoce naráz. Každé combo pošle soupeři naschvál.",
+      "ikona": "ovoce",
+      "barva": "#f2948a",
+      "typ": "živá",
+      "delka": "1–2 min",
+      "stav": "hraj",
+      "pravidla": [
+        "Hrajete oba ve stejnou chvíli, každý na svém telefonu, se stejným ovocem.",
+        "Tři kusy jedním tahem nebo speciální ovoce pošlou soupeři bombu navíc, šmouhu přes displej nebo zmrzlé ovoce.",
+        "Po kole vyhrává vyšší skóre. Bombu nesekej."
+      ]
+    },
+    {
+      "id": "polstarovka",
+      "nazev": "Polštářovka",
+      "twist": "Bitva přes ulici ve větru: polštáře, vodní balónky, dort a triky.",
+      "ikona": "polstar",
+      "barva": "#b9a8ec",
+      "typ": "tahová",
+      "delka": "~10 min",
+      "stav": "brzy",
+      "pravidla": [
+        "Střídáte se v hodech přes ulici. Úhel a sílu nastavíš tažením, vítr fouká pokaždé jinak.",
+        "Vybíráš, čím hodíš, a každý trik (deštník, bezvětří, dvojhod…) máš jen jednou za hru.",
+        "Kdo první spadne na nulu, prohrál. Po 40 hodech vyhrává ten, komu zbylo víc."
+      ]
+    },
+    {
+      "id": "tancicky",
+      "nazev": "Tančíky",
+      "twist": "Tanková přestřelka na kola: za každý zásah mince, mezi koly nákupy v obchodě.",
+      "ikona": "tank",
+      "barva": "#8fc7c0",
+      "typ": "tahová",
+      "delka": "~15 min",
+      "stav": "brzy",
+      "pravidla": [
+        "Nastav úhel a sílu, vystřel a trefuj soupeřův tank v kopcovitém terénu.",
+        "Kolik životů soupeři ubereš, tolik dostaneš mincí. Před kolem za ně nakoupíš zbraně a vylepšení.",
+        "Kolo končí zničením tanku, nebo po 16 tazích, kdy vyhrává víc životů."
+      ]
+    },
+    {
+      "id": "kvizove-lode",
+      "nazev": "Nafukovací flotila",
+      "twist": "Lodě s kvízem: kategorii otázky ti vybírá soupeř, obtížnost riskuješ sám.",
+      "ikona": "kachna",
+      "barva": "#8ec5ec",
+      "typ": "tahová",
+      "delka": "~10 min",
+      "stav": "brzy",
+      "pravidla": [
+        "Schováš nafukovací hračky do bazénu a hledáš soupeřovy.",
+        "Každý tah jedna otázka. Kategorii ti vybral soupeř, obtížnost si zvolíš sám.",
+        "Špatně je jedna rána, správně až čtyři. Za rychlou odpověď dostaneš i radar."
+      ]
+    },
+    {
+      "id": "psanicko",
+      "nazev": "Psaníčko",
+      "twist": "Piškvorky po psaníčkách: k výzvě sázka, ke každému tahu drzý vzkaz s razítkem.",
+      "ikona": "psanicko",
+      "barva": "#f5a8bf",
+      "typ": "tahová",
+      "delka": "~15 min",
+      "stav": "hraj",
+      "pravidla": [
+        "Klasické piškvorky, pět v řadě vyhrává.",
+        "Při výzvě si dáte sázku, třeba o kafe.",
+        "Ke každému tahu můžeš přidat krátký vzkaz a razítko. Skóre odvet se počítá."
+      ]
+    },
+    {
+      "id": "jamka-na-miru",
+      "nazev": "Jamka na míru",
+      "twist": "Minigolf, kde ti před každou jamkou soupeř postaví past.",
+      "ikona": "jamka",
+      "barva": "#a6d98a",
+      "typ": "tahová",
+      "delka": "~10 min",
+      "stav": "brzy",
+      "pravidla": [
+        "Hrajete minigolf na střídačku, jamku po jamce.",
+        "Před každou jamkou postavíš soupeři do dráhy past a on tobě taky.",
+        "Vyhrává, kdo má po všech jamkách méně ran."
+      ]
+    },
+    {
+      "id": "ctyrka-s-otockou",
+      "nazev": "Čtyřka s otočkou",
+      "twist": "Čtyři v řadě, ale jednou za partii můžeš otočit celou desku o 90°.",
+      "ikona": "ctyrka",
+      "barva": "#f7d36b",
+      "typ": "tahová",
+      "delka": "~5 min",
+      "stav": "brzy",
+      "pravidla": [
+        "Házíte žetony do sloupců, vyhrává čtyři v řadě vodorovně, svisle nebo šikmo.",
+        "Jednou za partii můžeš místo tahu otočit celou desku o 90°.",
+        "Po otočení žetony spadnou dolů a z hotové pozice může být úplně jiná."
+      ]
+    },
+    {
+      "id": "caranice",
+      "nazev": "Čáranice",
+      "twist": "Kreslíš a soupeř hádá. Předem si vsadíš, za kolik vteřin to uhodne.",
+      "ikona": "caranice",
+      "barva": "#f4b3a0",
+      "typ": "živá",
+      "delka": "~10 min",
+      "stav": "brzy",
+      "pravidla": [
+        "Jeden kreslí, druhý hádá, pak se vystřídáte.",
+        "Kreslíř si před kreslením vsadí, za kolik vteřin soupeř obrázek uhodne.",
+        "Čím blíž sázka skutečnému času, tím víc bodů."
+      ]
+    }
+  ]
+}

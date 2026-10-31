@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Herna – návrh A Hřiště</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#231f1c;--ink2:#4d443c;--sky:#bfe6f7;--hill:#8cc66a;--sand:#f6dd9c;--paper:#fffaf0;--hot:#f2711c}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--sand);color:var(--ink);font:400 16px/1.4 "Bricolage Grotesque",system-ui,sans-serif}
+h1,h2,p{margin:0}
+.scena{position:relative;background:var(--sky);padding:calc(18px + env(safe-area-inset-top)) 20px 0;overflow:hidden}
+.scena h1{font-size:64px;line-height:.9;font-weight:800;letter-spacing:-.03em;font-variation-settings:"opsz" 96}
+.scena p{margin-top:10px;font-size:17px;max-width:24ch;color:var(--ink2)}
+.dvojice{display:block;width:250px;height:144px;margin:4px auto -6px;position:relative;z-index:1}
+.kopec{display:block;width:calc(100% + 40px);height:44px;margin:0 -20px;position:relative}
+.hry{list-style:none;margin:0;padding:16px 16px calc(28px + env(safe-area-inset-bottom));display:grid;gap:14px}
+.hra{position:relative;display:grid;grid-template-columns:64px 1fr;gap:12px;padding:14px;background:var(--paper);border:3px solid var(--ink);border-radius:22px;box-shadow:0 5px 0 var(--ink)}
+.hra:has(.hra-odkaz:focus-visible){outline:3px solid var(--hot);outline-offset:4px}
+.hra-ikona{width:64px;height:64px;border-radius:18px;background:var(--c);border:3px solid var(--ink);display:grid;place-items:center}
+.hra-ikona svg{width:50px;height:50px}
+.hra-text{min-width:0;padding-right:46px}
+.hra-posl{display:inline-block;font-size:12.5px;font-weight:700;color:var(--hot);margin-bottom:2px}
+.hra-nazev{font-size:22px;line-height:1.1;font-weight:800;letter-spacing:-.01em}
+.hra-odkaz{color:inherit;text-decoration:none;outline:none}
+.hra-odkaz::after{content:"";position:absolute;inset:0;border-radius:20px}
+.hra-twist{margin-top:5px;font-size:15px;line-height:1.35;color:var(--ink2)}
+.hra-meta{display:flex;align-items:center;gap:8px;white-space:nowrap;margin-top:8px;font-size:13px;font-weight:600}
+.hra-typ{padding:3px 9px;border:2px solid var(--ink);border-radius:999px;background:#fff}
+.hra-typ-ziva{background:var(--ink);color:var(--paper)}
+.hra-pravidla{position:relative;z-index:2;margin:-10px -6px -10px auto;min-height:44px;padding:0 6px;border:0;background:none;font:inherit;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.hra-akce{position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-size:0}
+.hra-akce svg{width:24px;height:24px}
+.je-brzy{background:transparent;border-style:dashed;box-shadow:none}
+.je-brzy .hra-ikona{filter:saturate(.35)}
+.je-brzy .hra-twist{color:#6b5f52}
+.hra-brzy{width:auto;height:auto;padding:5px 10px;border-radius:999px;background:transparent;border:2px solid var(--ink);color:var(--ink);font-size:13px;font-weight:700}
+.chyba{padding:20px;font-weight:600}
+.pata{padding:0 20px calc(24px + env(safe-area-inset-bottom));font-size:13px;color:var(--ink2)}
+/* panel s pravidly: list zespodu */
+.panel{position:fixed;inset:0;z-index:10}
+.panel-pozadi{position:absolute;inset:0;background:rgba(35,31,28,.45);opacity:0;transition:opacity .2s}
+.panel-list{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-top:3px solid var(--ink);border-radius:26px 26px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .22s ease-out;max-height:85vh;overflow:auto}
+.je-otevreny .panel-pozadi{opacity:1}.je-otevreny .panel-list{transform:none}
+.panel-hlava{display:grid;grid-template-columns:56px 1fr 44px;gap:12px;align-items:center}
+.panel-ikona{width:56px;height:56px;border-radius:16px;background:var(--c);border:3px solid var(--ink);display:grid;place-items:center}
+.panel-ikona svg{width:44px;height:44px}
+.panel-nazev{font-size:24px;font-weight:800}
+.panel-meta{font-size:14px;color:var(--ink2)}
+.panel-zavri{width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);background:#fff;display:grid;place-items:center;cursor:pointer}
+.panel-zavri svg{width:18px;height:18px}
+.panel-pravidla{margin:18px 0 20px;padding-left:22px;display:grid;gap:10px;font-size:16px}
+.panel-hraj{display:flex;justify-content:center;align-items:center;min-height:54px;border-radius:16px;background:var(--hot);color:#fff;font-weight:800;font-size:18px;text-decoration:none;border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+.panel-hraj[aria-disabled]{background:#e9dfcc;color:var(--ink2);box-shadow:none}
+@media (prefers-reduced-motion:reduce){.panel-list,.panel-pozadi{transition:none}}
+/* desktop: scéna vlevo přes celou výšku, hry vpravo ve dvou sloupcích */
+@media (min-width:960px){
+  .stranka{display:grid;grid-template-columns:minmax(360px,30vw) 1fr;min-height:100vh}
+  .scena{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:48px 40px 0}
+  .scena h1{font-size:96px}
+  .scena p{font-size:20px}
+  .dvojice{width:100%;max-width:420px;height:auto;aspect-ratio:260/150;margin:auto auto -10px}
+  .kopec{height:90px;width:calc(100% + 80px);margin:0 -40px}
+  .hry{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;padding:48px 40px;align-content:start}
+  .hra{grid-template-columns:76px 1fr;padding:18px;gap:16px}
+  .hra-ikona{width:76px;height:76px}.hra-ikona svg{width:60px;height:60px}
+  .hra-text{padding-right:0;display:flex;flex-direction:column;min-height:100%}
+  .hra-nazev{font-size:24px}
+  .hra-meta{margin-top:auto;padding-top:10px}
+  .hra-akce{top:18px;right:18px}
+  .hra-text{padding-right:50px}
+  .hra-odkaz:hover{text-decoration:underline}
+  .hra:not(.je-brzy):hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--ink)}
+  .pata{grid-column:2;padding:0 40px 32px}
+  .panel-list{left:auto;top:0;width:440px;border-top:0;border-left:3px solid var(--ink);border-radius:26px 0 0 26px;transform:translateX(100%);max-height:none;padding:28px}
+}
+</style>
+</head>
+<body>
+<div class="stranka">
+  <header class="scena">
+    <h1>Herna</h1>
+    <p>Hry pro dva na jednom odkazu. Vyber hru, založ výzvu a pošli ji.</p>
+    <svg class="dvojice" viewBox="0 0 260 150" role="img" aria-label="Kluk a holka čelo na čele"><use href="#i-dvojice"/></svg>
+    <svg class="kopec" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60 V26 Q90 2 200 18 T400 10 V60 Z" fill="#8cc66a"/><path d="M0 60 V44 Q120 30 240 42 T400 40 V60 Z" fill="#f6dd9c"/></svg>
+  </header>
+  <main>
+    <ul id="hry" class="hry" data-zdroj="../games.json" data-bez-kontroly></ul>
+  </main>
+  <p class="pata">Hra se zakládá až uvnitř. Odkaz s výzvou pak pošleš do chatu.</p>
+</div>
+<div id="panel" class="panel" hidden role="dialog" aria-modal="true" aria-labelledby="panel-nazev">
+  <div class="panel-pozadi" data-zavri></div>
+  <div class="panel-list">
+    <div class="panel-hlava">
+      <span class="panel-ikona"></span>
+      <div><h2 class="panel-nazev" id="panel-nazev"></h2><p class="panel-meta"></p></div>
+      <button class="panel-zavri" type="button" data-zavri aria-label="Zavřít"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4 L16 16 M16 4 L4 16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
+    </div>
+    <ol class="panel-pravidla"></ol>
+    <a class="panel-hraj"></a>
+  </div>
+</div>
+<script src="../ikony.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>
