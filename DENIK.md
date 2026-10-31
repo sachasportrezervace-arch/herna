@@ -2,6 +2,17 @@
 
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
+## 2026-10-31 – Kafíčka a Tančíky v živé místnosti, Čáranice znovu
+- **Hotovo:** `tests/mistnost-hry.cjs` umí i `kaficka` (živě f42fd1d) a `tancicky` (živě 7c734df); bez argumentu běží všech sedm her. Kafíčka se hrají z DOM (klik na políčko, Položit, výběr hrnku, Podat; Mark vyhrává, Radka podává vítězné hrnky), Tančíky přes `window.__tanc` + `TankEngine.suggestShot` (celý zápas, 32 tahů).
+- **Živě (Pages, `NODE_PATH="$(npm root -g)" node tests/mistnost-hry.cjs <hra>`):**
+  caranice **52 PASS / 0 FAIL, exit 0** (oprava 01a09da drží, Odveta i Jiná hra na iPhonu 13 celé v rámu) ·
+  kaficka **50 PASS / 1 FAIL, exit 1** · tancicky **40 PASS / 2 FAIL, exit 1**.
+  Zelené u obou nových: přepnutí Radce, seat/zaklada, stejné r, bez výzvy a setupu, celá partie, skóre v liště u obou, po 7 s jeden záznam `g` ve dokumentu místnosti, Jiná hra zpět do místnosti, žádné chyby JS.
+- **Chyba Kafíček (neopraveno, jen popis):** iPhone 13, iframe 613 px (lišta 51 px). Na konci partie leží Odveta i Jiná hra celé v rámu (cca 594 z 613 px), ale `#endBox` končí na y 651, takže řádek pod tlačítky („Příští partie: Rohy. Radka podává první hrnek…“) je oříznutý a stránka se posouvá (výška 715 při 613). Při pokládání a podávání se stránka na iPhonu také posouvá (668–719 px), ale deska, ruka, zásoba a tlačítka Položit/Podat jsou celé v rámu; test to u Kafíček toleruje.
+- **Chyba Tančíků (neopraveno, jen popis):** iPhone 13, iframe 613 px. Na konci zápasu je „Odveta“ na y 587–643 (ořezaná) a „Jiná hra“ na y 653–709 (celá pod spodní hranou); `scrollHeight` = 613 a v těle je `overflow: hidden`, takže se k nim uživatel nejspíš nedostane. Snímek `tests/shots/mistnost-tancicky-konec-iphone.png`. Vlastní test Tančíků to nechytí (iframe pod lištou 48 px, jejich ovládání nekontroluje na konci).
+- **Pozn.:** vítěz Kafíček v běhu = Mark (sedadlo 0), skóre 1 : 0; vítěz Tančíků = Radka (sedadlo 1), 0 : 1. Los, kdo podává první (Kafíčka), se neřídí.
+- **NEOVĚŘENO:** reálný iPhone, remíza, odveta, obnovení uprostřed partie u obou her, pád mantledb.
+
 ## 2026-10-31 – Kvízové lodě hratelné (dd543d3)
 - `tools/stavy.cjs --zapis`: Kvízové lodě (Nafukovací flotila) „hraj“, sólo ověřené u všech 10 živých her; brzy jen Jamka na míru (404).
 - Lokálně `tests/herna.cjs` 243 PASS / 0 FAIL, exit 0. Živě první běh hned po nasazení 225/18 (neprozkoumáno, nejspíš nedonasazená CDN Pages), druhý běh 243 PASS / 0 FAIL, exit 0.

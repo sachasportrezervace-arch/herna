@@ -1,5 +1,5 @@
 // Skutečná hra v živé místnosti Herny: node tests/mistnost-hry.cjs [psanicko|caranice ...] [URL Herny]
-// Bez názvu hry se spustí obě hry postupně (psanicko, caranice). Výchozí URL je živá Herna.
+// Bez názvu hry se spustí všechny hry postupně (psanicko, caranice, jezci-prak, mlask, ovocny-souboj, kaficka, tancicky). Výchozí URL je živá Herna.
 // Playwright z globální instalace (NODE_PATH = npm root -g). Mark v Chromiu 1440×900, Radka ve WebKitu iPhone 13.
 // Žádné makety a žádné přepisy games.json: je to ostrá Herna, ostrá hra i ostrý mantledb.
 // Ověří: založení, vstup Radky, výběr hry, automatické přepnutí Radce (herna=1, seat, zaklada, stejné r), žádná výzva ani setup,
@@ -441,6 +441,198 @@ const OVOCNY = {
   sekundarni: (P) => P.f.locator("#bOther"),
 };
 
+// ───────────────────────── Kafíčka (kaficka) ─────────────────────────
+// Quarto s hrnky, bez sázky, kdo podává první se losuje (hs = sedadlo Herny za x, Mark = sedadlo 0 = x). Bez testovacího rozhraní:
+// stav se čte z DOM (#game[data-ph] = place|pick|wait, #board .cell.full[aria-label], #trayCups .pick, #handDesc), tahy jsou kliky.
+// Mark (x) vítězí, kdykoli může, a nepodává Radce vítězný hrnek; Radka (o) podává Markovi vítězné hrnky. Výsledek se čte z #endTitle.
+function kafLines(m) {
+  const L = [];
+  for (let r = 0; r < 4; r++) L.push([0, 1, 2, 3].map((c) => r * 4 + c));
+  for (let c = 0; c < 4; c++) L.push([0, 1, 2, 3].map((r) => r * 4 + c));
+  L.push([0, 5, 10, 15], [3, 6, 9, 12]);
+  if (m === 1) for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) L.push([r * 4 + c, r * 4 + c + 1, r * 4 + c + 4, r * 4 + c + 5]);
+  if (m === 2) L.push([0, 3, 12, 15], [5, 6, 9, 10]);
+  if (m === 3) for (const d of [1, -1]) for (let c0 = 0; c0 < 4; c0++) { if ((d === 1 && c0 === 0) || (d === -1 && c0 === 3)) continue; L.push([0, 1, 2, 3].map((r) => r * 4 + (c0 + d * r + 8) % 4)); }
+  return L;
+}
+function kafDokonci(g, cup, cell, m) {
+  const h = g.slice(); h[cell] = cup;
+  return kafLines(m).some((l) => l.includes(cell) && l.every((c) => h[c] !== null) && (l.reduce((a, c) => a & h[c], 15) || l.reduce((a, c) => a & ~h[c] & 15, 15)));
+}
+const kafHrnek = (label) => { const s = label.split(": ").pop().toLowerCase().split(", "); return (s[0].startsWith("velký") ? 1 : 0) | (s[1] === "espresso" ? 2 : 0) | (s[2] === "hranatý" ? 4 : 0) | (s[3] === "s pěnou" ? 8 : 0); };
+const nahodny = (a) => a[Math.floor(Math.random() * a.length)];
+async function kafStav(f) {
+  const r = await f.evaluate(() => ({
+    ph: document.getElementById("game").dataset.ph, view: document.body.dataset.view,
+    cells: [...document.querySelectorAll("#board .cell.full")].map((c) => [+c.dataset.i, c.getAttribute("aria-label")]),
+    tray: [...document.querySelectorAll("#trayCups .pick")].map((b) => ({ id: +b.dataset.id, back: b.classList.contains("back") })),
+    desc: document.getElementById("handDesc").textContent, m: +document.getElementById("board").dataset.m,
+    end: !document.getElementById("endBox").hidden, ho: !document.getElementById("handover").hidden,
+  }));
+  const g = new Array(16).fill(null);
+  r.cells.forEach(([i, l]) => { g[i] = kafHrnek(l); });
+  r.g = g;
+  r.held = r.ph === "place" ? kafHrnek(r.desc.split(". ")[0].replace(/^./, (c) => c.toLowerCase())) : null;
+  r.free = g.map((v, i) => (v === null ? i : -1)).filter((i) => i >= 0);
+  return r;
+}
+// jeden tah hráče (položit, nebo vybrat a podat); vrací true, když něco odehrál
+async function kafTah(P, strat) {
+  const f = P.f;
+  const s = await kafStav(f);
+  if (s.ho) { await f.locator("#handover").click({ position: { x: 20, y: 20 }, timeout: 1500 }).catch(() => {}); await sleep(500); return true; }
+  if (s.end || s.view === "end") return false;
+  if (s.ph === "place") {
+    const vyhra = s.free.find((c) => kafDokonci(s.g, s.held, c, s.m));
+    const cell = strat === "win" && vyhra !== undefined ? vyhra : nahodny(s.free);
+    try {
+      await f.locator(`#board .cell[data-i="${cell}"]`).click({ timeout: 2000 });
+      await f.waitForSelector("#board .cell.ghost", { timeout: 700 });
+    } catch { await sleep(100); return false; }
+    if (!P.kafFit.place) { P.kafFit.place = true; await vejdeSe(P, `${P.nazev} pokládá hrnek`, "pokladani"); await P.page.screenshot({ path: `${SHOTS}/mistnost-kaficka-pokladani-${P.nazev}.png` }); }
+    try { await f.locator("#placeBtn").click({ timeout: 2000 }); } catch { await sleep(100); return false; }
+    await sleep(250); return true;
+  }
+  if (s.ph === "pick") {
+    const cand = s.tray.filter((t) => !t.back);
+    const vitezne = cand.filter((t) => s.free.some((c) => kafDokonci(s.g, t.id, c, s.m)));
+    const bezpecne = cand.filter((t) => !vitezne.includes(t));
+    const volba = strat === "feed" && vitezne.length ? nahodny(vitezne) : strat === "win" && bezpecne.length ? nahodny(bezpecne) : nahodny(cand);
+    try {
+      await f.locator(`#trayCups .pick[data-id="${volba.id}"]`).click({ timeout: 2000 });
+      await f.waitForFunction(() => !document.getElementById("giveBtn").disabled, null, { timeout: 700 });
+    } catch { await sleep(100); return false; }
+    if (!P.kafFit.pick) { P.kafFit.pick = true; await vejdeSe(P, `${P.nazev} podává hrnek`, "podavani"); await P.page.screenshot({ path: `${SHOTS}/mistnost-kaficka-podavani-${P.nazev}.png` }); }
+    try { await f.locator("#giveBtn").click({ timeout: 2000 }); } catch { await sleep(100); return false; }
+    await sleep(250); return true;
+  }
+  return false;
+}
+const kafKonec = (P) => P.f.evaluate(() => !document.getElementById("endBox").hidden).catch(() => false);
+const KAFICKA = {
+  id: "kaficka",
+  nazev: "Kafíčka",
+  vitez: 0,
+  skryteIds: ["newGameBtn", "copyTopBtn", "fsBtn", "setup", "intro", "share", "waitBox", "soloBtn", "infoNew"],
+  async pripravena(P) {
+    P.kafFit = {};
+    await P.f.waitForFunction(() => !document.getElementById("game").hidden && document.body.dataset.view === "play" && !/nesedí/.test(document.getElementById("oppWhat").textContent) && !!document.getElementById("game").dataset.ph, null, { timeout: 40000 });
+  },
+  async sedadla(A, B) {
+    const t = (P) => P.f.evaluate(() => document.getElementById("oppTag").textContent.trim().toLowerCase());
+    const [a, b] = [await t(A), await t(B)];
+    check("Mark (sedadlo 0) hraje proti Radce, Radka proti Markovi", a === "radka" && b === "mark", [a, b]);
+    const fz = [await kafStav(A.f), await kafStav(B.f)].map((s) => s.ph).sort().join();
+    check("jeden podává (losem), druhý čeká", fz === "pick,wait", fz);
+  },
+  async bezUi(P) {
+    return !(await jptVis(P.f, "#setup")) && !(await jptVis(P.f, "#intro")) && !(await jptVis(P.f, "#share")) && !(await jptVis(P.f, "#waitBox")) && !(await jptVis(P.f, "#soloBtn"));
+  },
+  async jmena(P) { return P.f.evaluate(() => document.getElementById("sackTop").textContent + " " + document.getElementById("oppTag").textContent); },
+  selektory: { start: ["#board"], pokladani: ["#board", "#hand", "#placeBtn"], podavani: ["#board", "#tray", "#giveBtn"], konec: ["#endBox", "#endPrimary", "#endSecondary"] },
+  // Kafíčka se na mobilu smí v rámu posouvat (pod ovládáním leží pravidla, to autoři testují); měří se, že vybrané prvky jsou celé nad spodní hranou
+  async fit(P, faze) {
+    const r = await fitFrame(P, this.selektory[faze] || []);
+    if (!r.ok && r.info.sw <= r.info.iw + 1 && Object.keys(r.info.kde).length === 0) return { ok: true, info: r.info };
+    return r;
+  },
+  fitNazev: "deska a ovládání celé nad spodní hranou iframe (stránka se smí posouvat)",
+  ovladani(faze) { return faze === "start" ? [] : (this.selektory[faze] || []).filter((s) => s !== "#board"); },
+  async partie(A, B) {
+    const t0 = Date.now();
+    let kroky = 0;
+    while (Date.now() - t0 < 240000) {
+      if ((await kafKonec(A)) && (await kafKonec(B))) break;
+      const x = await kafTah(A, "win"), y = await kafTah(B, "feed");
+      if (x || y) kroky++; else await sleep(300);
+    }
+    const hotovo = await cekej(async () => (await kafKonec(A)) && (await kafKonec(B)), 15000);
+    check("partie skončila u obou", hotovo, { kroky });
+    await sleep(1000);
+    const nadpis = (P) => P.f.evaluate(() => document.getElementById("endTitle").textContent);
+    const [ta, tb] = [await nadpis(A), await nadpis(B)];
+    const v = /Vyhráváš/.test(ta) ? 0 : /Vyhráváš/.test(tb) ? 1 : /Remíza/.test(ta) && /Remíza/.test(tb) ? null : -1;
+    console.log(`  (partie: ${kroky} tahů, „${ta}“ / „${tb}“, vítěz = ${v === null ? "remíza" : "sedadlo " + v})`);
+    check("oba vidí stejný výsledek (jeden vyhrál, nebo remíza)", v !== -1 && !(/Vyhráváš/.test(ta) && /Vyhráváš/.test(tb)), [ta, tb]);
+    return v === -1 ? null : v;
+  },
+  primarni: (P) => P.f.locator("#endPrimary"),
+  sekundarni: (P) => P.f.locator("#endSecondary"),
+};
+KAFICKA.fit = KAFICKA.fit.bind(KAFICKA);
+KAFICKA.ovladani = KAFICKA.ovladani.bind(KAFICKA);
+
+// ───────────────────────── Tančíky (tancicky) ─────────────────────────
+// Dělostřelecký souboj, sázka v Herně vždy „Jen o čest“. Hra vystavuje window.__tanc (state, me, play, skip, inputs, busy, animating)
+// a TankEngine.suggestShot; partie = celý zápas (kola do zničení tanku nebo 16 tahů). Oba hráči střílejí doporučenou střelou,
+// Mark (sedadlo 0, zakladatel) = tank 0, Radka = tank 1; vítěz je index tanku = sedadlo Herny (null = remíza). Výsledek se čte ze state().winner.
+const tcSnap = (P) => P.f.evaluate(() => { const t = window.__tanc; if (!t) return null; const s = t.state(); return s ? { cur: s.cur, me: t.me(), over: !!s.matchOver, winner: s.winner, anim: t.animating(), busy: t.busy(), view: document.body.dataset.view, n: t.inputs().length, gi: (t.series() || [0, 0]).join(":"), round: s.round } : { view: document.body.dataset.view, me: t.me(), none: true }; }).catch(() => null);
+async function tcTah(P) {
+  for (let k = 0; k < 4; k++) {
+    const ok = await P.f.evaluate(async () => {
+      try {
+        const sh = document.getElementById("shop"); if (sh && !sh.hidden) document.getElementById("shopDone").click();
+        return await window.__tanc.play(window.TankEngine.suggestShot(window.__tanc.state()));
+      } catch (e) { return "err:" + e.message; }
+    });
+    if (ok === true) return;
+    await sleep(1500);
+  }
+  throw new Error(P.nazev + ": play() odmítl tah 4×");
+}
+const TANCICKY = {
+  id: "tancicky",
+  nazev: "Tančíky",
+  async pripravena(P) {
+    P.tcFit = false;
+    await P.f.waitForFunction(() => window.__tanc && document.body.dataset.view === "play" && window.__tanc.me() !== null, null, { timeout: 40000 });
+  },
+  async sedadla(A, B) {
+    const [a, b] = [await tcSnap(A), await tcSnap(B)];
+    check("Mark = tank 0 (sedadlo 0), Radka = tank 1 (sedadlo 1), stejná série", !!a && !!b && a.me === 0 && b.me === 1 && a.gi === b.gi, [a, b]);
+  },
+  async bezUi(P) {
+    const v = await P.f.evaluate(() => {
+      const shown = (id) => { const e = document.getElementById(id); return !!e && e.checkVisibility(); };
+      return ["acceptBtn", "setupForm", "soloBtn", "createBtn", "localBtn", "a2hs"].filter(shown);
+    });
+    return v.length === 0 && (await P.f.evaluate(() => document.body.dataset.view)) === "play";
+  },
+  skryteIds: ["acceptBtn", "setupForm", "soloBtn", "createBtn", "localBtn", "copyTopBtn", "leaveBtn", "fullscreenBtn", "a2hs", "copyEndBtn", "menuBtn", "challengeBtn", "watchBtn"],
+  jmena: (P) => P.f.evaluate(() => document.body.innerText),
+  selektory: { start: ["#cv", "#ctrl"], hra: ["#cv", "#ctrl"], konec: ["#endTitle", "#endScore", "#rematchBtn", "#otherGameBtn"] },
+  async fit(P, faze) { return fitFrame(P, this.selektory[faze] || []); },
+  fitNazev: "hra se vejde do rámu (bez posunu, plátno a ovládání celé nad spodní hranou iframe)",
+  ovladani(faze) { return faze === "konec" ? ["#rematchBtn", "#otherGameBtn"] : []; },
+  async partie(A, B) {
+    const t0 = Date.now(); let tahy = 0, snimek = false;
+    while (Date.now() - t0 < 600000) {
+      const [a, b] = [await tcSnap(A), await tcSnap(B)];
+      for (const [P, s] of [[A, a], [B, b]]) if (s && s.anim) await P.f.evaluate(() => window.__tanc.skip()).catch(() => {});
+      if (a && b && a.over && b.over && !a.anim && !b.anim && !a.busy && !b.busy) break;
+      for (const [P, s] of [[A, a], [B, b]]) if (s && !s.none && !s.over && !s.anim && !s.busy && s.cur === s.me) { await tcTah(P); tahy++; }
+      if (!snimek && tahy >= 2) {
+        snimek = true;
+        for (const Q of [A, B]) await Q.page.screenshot({ path: `${SHOTS}/mistnost-tancicky-hra-${Q.nazev}.png` });
+        await vejdeSe(A, "desktop (zápas běží)", "hra");
+        await vejdeSe(B, "iPhone (zápas běží)", "hra");
+      }
+      await sleep(250);
+    }
+    const [a, b] = [await tcSnap(A), await tcSnap(B)];
+    check("zápas skončil u obou (matchOver)", !!a && !!b && a.over && b.over, [a, b]);
+    await Promise.all([A, B].map((P) => P.f.waitForSelector("body[data-view=end]", { timeout: 30000 }))).catch(() => {});
+    const w = a && (a.winner === 0 || a.winner === 1) ? a.winner : null;
+    console.log(`  (zápas: ${tahy} tahů, vítěz = ${w === null ? "remíza" : "sedadlo " + w})`);
+    check("oba vidí stejného vítěze", !!b && a.winner === b.winner, [a && a.winner, b && b.winner]);
+    return w;
+  },
+  primarni: (P) => P.f.locator("#rematchBtn"),
+  sekundarni: (P) => P.f.locator("#otherGameBtn"),
+};
+TANCICKY.fit = TANCICKY.fit.bind(TANCICKY);
+TANCICKY.ovladani = TANCICKY.ovladani.bind(TANCICKY);
+
 // ───────────────────────── společné ─────────────────────────
 let H = null;
 // Stránka ve hře se nesmí posouvat a vybrané prvky musí být celé v rámu.
@@ -594,7 +786,7 @@ async function scenar(hra, URL_) {
 }
 
 (async () => {
-  const HRY = { psanicko: PSANICKO, caranice: CARANICE, "jezci-prak": JEZKOMET, jezkomet: JEZKOMET, mlask: MLASK, "ovocny-souboj": OVOCNY };
+  const HRY = { psanicko: PSANICKO, caranice: CARANICE, "jezci-prak": JEZKOMET, jezkomet: JEZKOMET, mlask: MLASK, "ovocny-souboj": OVOCNY, kaficka: KAFICKA, tancicky: TANCICKY };
   let URL_ = ZIVA;
   const ids = [];
   for (const arg of process.argv.slice(2)) {
@@ -602,7 +794,7 @@ async function scenar(hra, URL_) {
     else if (HRY[arg]) ids.push(arg);
     else { console.error(`Neznámý argument „${arg}“. Hry: ${Object.keys(HRY).join(", ")}, nebo URL Herny.`); process.exit(2); }
   }
-  if (!ids.length) ids.push("psanicko", "caranice", "jezci-prak", "mlask", "ovocny-souboj");
+  if (!ids.length) ids.push("psanicko", "caranice", "jezci-prak", "mlask", "ovocny-souboj", "kaficka", "tancicky");
   for (const id of ids) await scenar(HRY[id], URL_);
   console.log(`\nVÝSLEDEK: ${ok} PASS, ${fail} FAIL`);
   process.exit(fail ? 1 : 0);
