@@ -309,9 +309,6 @@
     Array.prototype.forEach.call(document.querySelectorAll("#hry .hra"), function (li) {
       var je = li.getAttribute("data-id") === cur && seat !== null;
       li.classList.toggle("je-ted", je);
-      var stary = li.querySelector(".hra-ted");
-      if (stary && !je) stary.remove();
-      if (je && !stary) li.querySelector(".hra-text").insertAdjacentHTML("afterbegin", '<span class="hra-posl hra-ted">Teď hrajete</span>');
     });
   }
   H.poVykresleni(oznacKarty);
@@ -432,8 +429,16 @@
     c.innerHTML = ikona(h) + "<h2>" + esc(jmenoSedadla(stav.hra.kdo)) + " zakládá partii</h2>" +
       "<p>Hra naskočí sama, jakmile bude výzva hotová. Pak ji jen přijmeš.</p>" +
       '<div class="tecky" aria-hidden="true"><i></i><i></i><i></i></div>' +
-      '<button class="tl tl-2" type="button" id="ram-sam">Založit výzvu</button>';
+      '<p class="ram-dlouho skryte" id="ram-dlouho">Trvá to dlouho?</p>' +
+      '<button class="tl tl-2 skryte" type="button" id="ram-sam">Nečekat a založit výzvu</button>';
     c.hidden = false;
+    // Tlačítko až po chvíli: hned po výběru hry se čeká, jinak by vznikly dvě výzvy naráz.
+    var jedn = c.innerHTML;
+    setTimeout(function () {
+      var d = $("ram-dlouho"), t = $("ram-sam");
+      if (!d || !t || c.hidden || c.innerHTML !== jedn) return;
+      d.classList.remove("skryte"); t.classList.remove("skryte");
+    }, 12000);
   }
   function nactiStarou(hash) {
     var h = H.hra(ram.id);

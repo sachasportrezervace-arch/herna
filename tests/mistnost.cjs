@@ -72,6 +72,7 @@ async function rozvrzeni(page, nazev) {
   await a.click("#pas-zalozit");
   await a.fill('input[name="ja"]', "Mark");
   await a.fill('input[name="on"]', "Radka");
+  await a.waitForTimeout(450); // snímek až po dojetí animace
   await a.screenshot({ path: `${SHOTS}/mistnost-zalozit-desktop.png` });
   await a.click('#dlg-form [type="submit"]');
   await a.waitForURL(/#m=[0-9a-z]{10}$/, { timeout: 15000 });
@@ -79,6 +80,7 @@ async function rozvrzeni(page, nazev) {
   const mid = /#m=([0-9a-z]{10})$/.exec(odkaz)[1];
   await a.waitForSelector("#dlg .dlg-odkaz");
   check("pozvánka ukáže odkaz místnosti", (await a.textContent("#dlg .dlg-odkaz")).trim() === odkaz, odkaz);
+  await a.waitForTimeout(450); // snímek až po dojetí animace
   await a.screenshot({ path: `${SHOTS}/mistnost-pozvanka-desktop.png` });
   await a.click('#dlg [data-dlg-zavri].tl');
   await a.waitForTimeout(300);
@@ -119,6 +121,14 @@ async function rozvrzeni(page, nazev) {
   await rozvrzeni(b, "místnost iPhone");
   await a.screenshot({ path: `${SHOTS}/mistnost-desktop.png` });
   await rozvrzeni(a, "místnost desktop");
+  // Nejdelší povolená jména (16 znaků) nesmí roztáhnout hlavičku: pravá hrana pruhu = pravá hrana mřížky.
+  const hrany = await a.evaluate(() => {
+    document.getElementById("sk-j0").textContent = "Maximiliána Kris";
+    document.getElementById("sk-j1").textContent = "Bartoloměj Vojtě";
+    const r = (s) => Math.round(document.querySelector(s).getBoundingClientRect().right);
+    return { scena: r(".scena"), hry: r("#hry"), sirka: document.documentElement.scrollWidth, vw: innerWidth };
+  });
+  check("dlouhá jména: hlavička drží šířku mřížky", Math.abs(hrany.scena - hrany.hry) <= 2 && hrany.sirka <= hrany.vw, hrany);
 
   console.log("\nMark vybere hru s protokolem");
   await a.click('.hra[data-id="maketa"] .hra-odkaz');
@@ -150,6 +160,7 @@ async function rozvrzeni(page, nazev) {
   await a.click('.hra[data-id="maketa-stara"] .hra-odkaz');
   await a.waitForSelector('#dlg:not([hidden]) [data-akce="prepnout"]');
   check("dotaz „Přepnout na Stará maketa?“", /Přepnout na Stará maketa\?/.test(await a.textContent("#dlg .dlg-nadpis")));
+  await a.waitForTimeout(450); // snímek až po dojetí animace
   await a.screenshot({ path: `${SHOTS}/mistnost-prepnout-desktop.png` });
   await a.click('[data-akce="prepnout"]');
   check("Mark: stará hra bez parametrů", await cekej(async () => (await src(a)) === STARA), await src(a));
@@ -167,10 +178,12 @@ async function rozvrzeni(page, nazev) {
   await b.click('.hra[data-id="maketa"] .hra-odkaz');
   await b.waitForSelector('#dlg:not([hidden]) [data-akce="prepnout"]');
   check("Radka: dotaz na přepnutí rozehrané staré hry", /Přepnout na Maketa\?/.test(await b.textContent("#dlg .dlg-nadpis")));
+  await b.waitForTimeout(450); // snímek až po dojetí animace
   await b.screenshot({ path: `${SHOTS}/mistnost-prepnout-iphone.png` });
   await b.click('[data-akce="prepnout"]');
   check("Radka zakládá (seat=1, zaklada=1, k3)", await cekej(async () => /k3&seat=1&names=Mark,Radka&zaklada=1$/.test(await src(b))), await src(b));
   check("Mark: karta „Radka chce hrát“", await cekej(async () => await viditelne(a, "#volba") && /Radka chce hrát/.test(await a.textContent(".volba-kdo"))));
+  await a.waitForTimeout(450); // snímek až po dojetí animace
   await a.screenshot({ path: `${SHOTS}/mistnost-volba-desktop.png` });
   check("Markovi se hra přepne sama (zaklada=0)", await cekej(async () => /k3&seat=0&names=Mark,Radka&zaklada=0$/.test(await src(a))), await src(a));
   check("oba v nové partii", await cekej(async () => (await hra(a).locator("#m-stav").textContent()) === "Partie běží" && (await hra(b).locator("#m-stav").textContent()) === "Partie běží"));
@@ -196,6 +209,8 @@ async function rozvrzeni(page, nazev) {
   await C.page.goto(odkaz, { waitUntil: "networkidle" });
   await C.page.waitForSelector("#dlg:not([hidden]) .dlg-nadpis");
   check("třetí zařízení: „Kdo tu hraje?“", /Kdo tu hraje\?/.test(await C.page.textContent("#dlg .dlg-nadpis")));
+  await C.page.waitForTimeout(450);
+  await C.page.screenshot({ path: `${SHOTS}/mistnost-treti-iphone.png` });
   await C.ctx.close();
 
   check("žádné chyby JavaScriptu", a.chyby.length === 0 && b.chyby.length === 0, a.chyby.concat(b.chyby));

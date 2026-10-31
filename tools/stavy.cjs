@@ -35,7 +35,7 @@ async function overHru(browser, url) {
 }
 
 // Sólo (react-apps/HRY-SOLO-2026-10-31.md): <url>#solo ukáže „Trénink“, nespadne a nevolá sync (mantledb.sh).
-// Jen pak dostane hra v games.json "solo": true a Herna u ní ukáže odkaz „Zkusit sám“.
+// Jen pak dostane hra v games.json "solo": true a Herna u ní ukáže v panelu Pravidla tlačítko „Trénink bez soupeře“.
 async function overSolo(browser, url) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const page = await ctx.newPage();

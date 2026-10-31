@@ -20,7 +20,7 @@
   }
   function predChvili(t) {
     var m = Math.round((Date.now() - t) / 60000);
-    if (m < 2) return "teď";
+    if (m < 2) return "před chvílí";
     if (m < 60) return "před " + m + " min";
     var h = Math.round(m / 60);
     if (h < 24) return "před " + h + " h";
@@ -45,7 +45,6 @@
       '<div class="hra-meta"><span class="hra-typ hra-typ-' + (h.typ === "živá" ? "ziva" : "tahova") + '">' + esc(h.typ) + "</span>" +
       '<span class="hra-delka">' + esc(h.delka) + "</span>" +
       '<button class="hra-pravidla" type="button" data-pravidla="' + esc(h.id) + '" aria-label="Pravidla: ' + esc(h.nazev) + '">Pravidla</button>' +
-      (hraj && h.solo ? '<a class="hra-solo" href="' + esc(h.url) + '#solo" aria-label="Zkusit sám: ' + esc(h.nazev) + '">Zkusit sám</a>' : "") +
       "</div>" +
       (hraj
         ? '<span class="hra-akce" aria-hidden="true">Hraj<svg><use href="#i-sipka"/></svg></span>'

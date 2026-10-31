@@ -75,9 +75,7 @@ h1,h2,p{margin:0}
 .panel-hraj{display:flex;justify-content:center;align-items:center;min-height:54px;border-radius:16px;background:var(--ink);color:var(--paper);font-weight:800;font-size:18px;text-decoration:none}
 .panel-hraj[aria-disabled]{background:#e9dfcc;color:#5a5048}
 @media (prefers-reduced-motion:reduce){.panel-list,.panel-pozadi{transition:none}}
-/* Zkusit sám: sekundární odkaz vedle Pravidel */
-.hra-solo{position:relative;z-index:2;display:inline-flex;align-items:center;min-height:44px;margin:-6px 0;padding:0 4px;font-weight:800;color:var(--ink);text-decoration:underline dotted;text-underline-offset:3px}
-.je-brzy .hra-solo{display:none}
+/* Trénink bez soupeře: tlačítko v panelu Pravidla (na kartě by se do jednoho řádku nevešlo) */
 .panel-solo{display:flex;justify-content:center;align-items:center;min-height:48px;margin-top:10px;border-radius:16px;border:2px solid var(--ink);color:var(--ink);font-weight:800;text-decoration:none}
 .panel-solo[hidden],.v-mistnost .panel-solo{display:none}
 /* Pás s místností na úvodu */
@@ -111,7 +109,9 @@ h1,h2,p{margin:0}
 .skore{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin-top:2px}
 .sk-jm{font-size:21px;font-weight:800;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variation-settings:"opsz" 32}
 .sk-jm:last-child{text-align:right}
-.sk-jm.je-ja::after{content:"ty";display:block;margin-top:2px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--hot)}
+.sk-jm::after{content:"ty";display:block;margin-top:2px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--hot);visibility:hidden}
+.sk-jm.je-ja::after{visibility:visible}
+.skore:not(:has(.je-ja)) .sk-jm::after{display:none}
 .sk-cisla{display:flex;align-items:center;gap:8px;font-size:50px;font-weight:800;line-height:1;font-variation-settings:"opsz" 96;font-variant-numeric:tabular-nums}
 .sk-cisla b{min-width:1ch;text-align:center;display:inline-block}
 .sk-cisla i{font-style:normal;color:var(--hot)}
@@ -121,8 +121,7 @@ h1,h2,p{margin:0}
 .mist-pozvat{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 16px;border-radius:999px;border:2px solid var(--hot);background:transparent;color:var(--paper);font:inherit;font-weight:800;cursor:pointer}
 .mist-pozvat svg{width:18px;height:18px}
 .mist-pozvat[hidden]{display:none}
-.v-mistnost .hra-posl:not(.hra-ted),.v-mistnost .hra-solo{display:none}
-.hra-posl.hra-ted{background:var(--hot);color:var(--ink);border:2px solid var(--ink);padding:1px 8px}
+.v-mistnost .hra-posl{display:none}
 .v-mistnost .hra.je-ted{box-shadow:0 0 0 3px var(--night),0 0 0 6px var(--hot)}
 .ted{margin:14px 14px 0;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 10px 10px 12px;border-radius:22px;background:var(--c);color:var(--ink);border:3px solid var(--ink)}
 .ted[hidden]{display:none}
@@ -144,7 +143,7 @@ h1,h2,p{margin:0}
 .dlg-pole{display:grid;gap:6px;margin-bottom:14px;font-weight:700;font-size:15px}
 .dlg-pole input{min-height:52px;padding:0 14px;border-radius:14px;border:2px solid var(--ink);background:#fff;font:inherit;font-size:18px;font-weight:600;color:var(--ink);width:100%}
 .dlg-pole input:focus{outline:3px solid var(--hot);outline-offset:2px}
-.dlg-odkaz{display:block;margin-bottom:14px;padding:12px 14px;border-radius:14px;background:#f1e6d2;font-size:14px;font-weight:600;word-break:break-all;color:var(--ink);user-select:all;-webkit-user-select:all}
+.dlg-odkaz{display:block;font-family:inherit;margin-bottom:14px;padding:12px 14px;border-radius:14px;background:#f1e6d2;font-size:14px;font-weight:600;word-break:break-all;color:var(--ink);user-select:all;-webkit-user-select:all}
 .dlg-ikona{width:64px;height:64px;border-radius:50%;background:var(--c,#ffe0a8);border:3px solid var(--ink);display:grid;place-items:center;margin-bottom:14px}
 .dlg-ikona svg{width:48px;height:48px}
 .dlg-dvojice{display:flex;gap:6px;align-items:center;margin-bottom:14px}
@@ -168,13 +167,15 @@ h1,h2,p{margin:0}
 .ram-ceka[hidden]{display:none}
 .ram-ceka .dlg-ikona{width:96px;height:96px;margin-bottom:8px}
 .ram-ceka .dlg-ikona svg{width:72px;height:72px}
-.ram-ceka h2{font-size:26px;font-weight:800;line-height:1.1;font-variation-settings:"opsz" 32}
+.ram-ceka h2{font-size:26px;font-weight:800;line-height:1.1;font-variation-settings:"opsz" 32;text-wrap:balance}
 .ram-ceka p{max-width:30ch;color:var(--mut);font-size:15.5px}
 .ram-ceka .tl{margin-top:16px;border-color:var(--paper);color:var(--paper)}
+.ram-ceka .skryte{visibility:hidden}
+.ram-ceka .ram-dlouho{margin-top:14px}
 .tecky{display:flex;gap:7px;margin-top:6px}
 .tecky i{width:10px;height:10px;border-radius:50%;background:var(--hot);animation:tecka 1.2s infinite ease-in-out}
 .tecky i:nth-child(2){animation-delay:.15s}.tecky i:nth-child(3){animation-delay:.3s}
-@keyframes tecka{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:none}}
+@keyframes tecka{0%,80%,100%{opacity:.45;transform:scale(.8)}40%{opacity:1;transform:none}}
 .ram-otevreny,.ram-otevreny body{overflow:hidden}
 /* Karta volby: krátce před přepnutím hry, nikdy přes běžící hru */
 .volba{position:fixed;inset:0;z-index:30;display:grid;place-content:center;justify-items:center;gap:4px;padding:24px;background:var(--c);color:var(--ink);text-align:center;opacity:0;transition:opacity .18s}
@@ -187,6 +188,7 @@ h1,h2,p{margin:0}
 .volba-hra{font-size:46px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variation-settings:"opsz" 96}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));z-index:40;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);padding:12px 18px;border-radius:16px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);font-weight:700;font-size:15px}
 .toast[hidden]{display:none}
+@media (max-width:429px){.ram-nazev{display:none}.ram-skore{margin-left:auto}.ram-skore .rs-jm{max-width:11ch}}
 @media (prefers-reduced-motion:reduce){.volba,.volba-ikona{transition:none}.bod,.tecky i{animation:none}}
 @media (min-width:960px){
   .pas{margin:28px 40px 0;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ikona text akce";padding:16px 18px 16px 18px;gap:18px}
@@ -199,18 +201,19 @@ h1,h2,p{margin:0}
   .v-mistnost .dvojice{display:block}
   .skore{display:flex;align-items:center;gap:28px}
   .sk-jm{font-size:36px}.sk-jm:last-child{text-align:left}
-  .sk-cisla{font-size:104px;gap:16px}
+  .sk-cisla{font-size:104px;gap:16px;flex:none}
   .scena .mist-stav{font-size:17px;margin-top:14px;margin-bottom:0}
   .ted{margin:28px 40px 0;padding:12px 14px 12px 16px}
   .ted-ikona{width:60px;height:60px}.ted-ikona svg{width:46px;height:46px}
   .ted-nazev{font-size:23px}
   .historie{padding:0 40px 32px;max-width:720px}
   .ram-nazev{font-size:16px}
+  .ram-skore .rs-jm{max-width:18ch}
   .volba-hra{font-size:80px}
   .volba-ikona{width:170px;height:170px}.volba-ikona svg{width:130px;height:130px}
 }
 @media (min-width:960px){
-  .scena{min-height:0;max-width:1240px;margin:0 auto;padding:48px 40px 0;display:grid;grid-template-columns:1fr 420px;grid-template-areas:"t d" "pult pult";overflow:visible}
+  .scena{min-height:0;max-width:1240px;margin:0 auto;padding:48px 40px 0;display:grid;grid-template-columns:minmax(0,1fr) 420px;grid-template-areas:"t d" "pult pult";overflow:visible}
   .dvojice{grid-area:d;align-self:end}
   .scena h1{font-size:104px}
   .scena-text{grid-area:t;align-self:end;padding-bottom:0}
@@ -227,11 +230,11 @@ h1,h2,p{margin:0}
   .hra-nazev{font-size:23px}
   .hra-twist{margin-top:6px;font-size:15.5px;line-height:1.38}
   .hra-meta{font-size:14px}
-  .panel-list{display:flex;flex-direction:column;justify-content:center}
+  .panel-list{display:flex;flex-direction:column;justify-content:flex-start}
   .hra:not(.je-brzy):hover{transform:translateY(-3px)}
   .hra-odkaz:hover{text-decoration:underline}
   .pata{max-width:1240px;margin:0 auto;padding:0 40px 36px}
-  .panel-list{left:auto;top:0;width:440px;border-top:0;border-left:3px solid var(--ink);border-radius:26px 0 0 26px;transform:translateX(100%);max-height:none;padding:28px}
+  .panel-list{left:auto;top:0;width:440px;border-top:0;border-left:3px solid var(--ink);border-radius:26px 0 0 26px;transform:translateX(100%);max-height:none;padding:72px 28px 28px}
 }
 </style>
 </head>
@@ -274,7 +277,7 @@ h1,h2,p{margin:0}
     </div>
     <ol class="panel-pravidla"></ol>
     <a class="panel-hraj"></a>
-    <a class="panel-solo" hidden>Zkusit sám</a>
+    <a class="panel-solo" hidden>Trénink bez soupeře</a>
   </div>
 </div>
 <div id="dlg" class="panel dlg" hidden role="dialog" aria-modal="true" aria-labelledby="dlg-nadpis">

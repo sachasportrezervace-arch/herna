@@ -2,6 +2,18 @@
 
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
+## 2026-10-31 – místnost pro dva (#m=), protokol pro hry, Zkusit sám
+- **Hotovo (commit 30b8637, zatím nepushnuto):** `mistnost.js` = místnost `herna/#m=<id>` na mantledb `herna-<id>/mistnost`
+  (jména, aktuální hra, skóre, posledních 30 partií, pojistka „Tohle je moje místnost, jsem Mark“, „Kdo tu hraje?“ pro třetí zařízení).
+  Hra běží v iframe přes celou obrazovku s lištou (Místnost, název, skóre). Volba druhého hráče: karta „Mark chce hrát · Hra“ 1,6 s, pak hra.
+  Uprostřed partie se přepnutí ptá. Hry bez protokolu: Herna čte hash výzvy v iframe (stejný origin) a pošle ho druhému.
+  Protokol: `react-apps/HERNA-PROTOKOL.md`. Makety: `tests/maketa/` (protokol), `tests/maketa-stara/` (bez něj).
+  `tools/stavy.cjs` nově ověřuje `#solo` (Trénink, bez chyby, bez mantledb) → `"solo": true` → odkaz „Zkusit sám“ na kartě a v pravidlech.
+  Sólo teď: mlask, tancicky, psanicko, ctyrka-s-otockou. Nafukovací flotila (kvizove-lode) je nově „hraj“.
+- **Ověřeno lokálně:** `node tests/mistnost.cjs http://127.0.0.1:8807/` → 48 PASS, 0 FAIL; `node tests/herna.cjs http://127.0.0.1:8807/` → 203 PASS, 0 FAIL.
+  Laťka „3 celé karty na iPhonu“ snížena na pás místnosti + 2 karty (SE: + 1), pás je nová hlavní cesta.
+- **Další krok:** design-eye „profi“ (rendery v tests/shots/mistnost-*.png), opravy, push, živý test obou testů, sem výsledek.
+
 ## 2026-10-31 – nové živé hry
 - Polštářovka → **Mlask!**: id `mlask` (nové repo, stará adresa přesměrovává), nový twist a pravidla s tajnou obranou, nová ikona dílku dortu.
 - `tools/stavy.cjs --zapis`: hraj nově Čtyřka s otočkou a Čáranice (Kafíčka po pushi cf776e9 se načtou). Brzy zůstávají Kvízové lodě a Jamka na míru (404).

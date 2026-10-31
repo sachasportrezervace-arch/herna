@@ -61,7 +61,15 @@ async function scenar(browser, nazev, ctxOpts, stavy) {
     check(`${k.id}: „${k.brzy ? "brzy" : "hraj"}“ odpovídá games.json + HTTP ${s.status}`, maBytHratelna === !k.brzy, k);
     if (!k.brzy) check(`${k.id}: odkaz vede na ${s.url}`, k.href === s.url, k.href);
     const maSolo = !k.brzy && !!(hryJson.hry.find((h) => h.id === k.id) || {}).solo;
-    check(`${k.id}: „Zkusit sám“ ${maSolo ? "vede na #solo" : "není"}`, maSolo ? k.solo === s.url + "#solo" : k.solo === null, k.solo);
+    check(`${k.id}: na kartě není odkaz Trénink (je v panelu Pravidla)`, k.solo === null, k.solo);
+    if (!k.brzy) {
+      await page.click(`.hra[data-id="${k.id}"] .hra-pravidla`);
+      await page.waitForTimeout(250);
+      const sp = await page.evaluate(() => { const a = document.querySelector("#panel .panel-solo"); const r = a.getBoundingClientRect(); return { skryty: a.hidden || r.width === 0, href: a.href, h: Math.round(r.height) }; });
+      check(`${k.id}: panel Pravidla ${maSolo ? "nabízí Trénink bez soupeře (#solo, ≥ 44 px)" : "Trénink nenabízí"}`, maSolo ? !sp.skryty && sp.href === s.url + "#solo" && sp.h >= 44 : sp.skryty, sp);
+      await page.click("#panel .panel-zavri");
+      await page.waitForTimeout(250);
+    }
   }
   check("pás „Místnost pro dva“ s tlačítkem Založit", await page.evaluate(() => !document.getElementById("pas").hidden && !!document.getElementById("pas-zalozit")));
   const prvniBrzy = karty.findIndex((k) => k.brzy);
@@ -82,7 +90,7 @@ async function scenar(browser, nazev, ctxOpts, stavy) {
   // rozvržení
   const roz = await page.evaluate(() => {
     const sirka = document.documentElement.scrollWidth, vw = window.innerWidth;
-    const male = [...document.querySelectorAll("button, a.hra-odkaz, a.hra-solo, a.tl, .hra")].map((el) => {
+    const male = [...document.querySelectorAll("button, a.hra-odkaz, a.tl, .hra")].map((el) => {
       const target = el.matches("a.hra-odkaz") ? el.closest(".hra") : el;
       const r = target.getBoundingClientRect();
       return { t: (el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 20), w: Math.round(r.width), h: Math.round(r.height) };
