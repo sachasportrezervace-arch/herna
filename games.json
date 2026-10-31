@@ -14,7 +14,8 @@
         "Na desce 4 × 4 skládáte hrnky. Každý je velký nebo malý, espresso nebo latte, kulatý nebo hranatý, s pěnou nebo bez.",
         "Vyhrává, kdo položí čtvrtý hrnek do řady, kde mají všechny aspoň jednu věc společnou.",
         "Hrnek, který položíš, ti ale vybral soupeř. A ty pak vybíráš jemu."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "zviratka-sogi",
@@ -29,7 +30,8 @@
         "Deska 3 × 4, každý má lva, žirafu, slona a kuřátko. Každé zvíře jde o jedno pole po svém.",
         "Sebrané zvíře je tvoje a místo tahu ho můžeš položit na volné pole.",
         "Vyhraješ, když chytíš soupeřova lva, nebo když tvůj lev v klidu doběhne na druhý konec."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "jezci-prak",
@@ -44,7 +46,8 @@
         "Natáhni prak, pusť a shoď z pevnosti soupeřovy tři postavičky.",
         "Po výstřelu vybereš, čím střílí soupeř: obyčejným, kamenným, gumovým, nebo bouchacím ježkem.",
         "Vyhrává, kdo první vyřadí všechny tři."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "ovocny-souboj",
@@ -59,7 +62,8 @@
         "Hrajete oba ve stejnou chvíli, každý na svém telefonu, se stejným ovocem.",
         "Tři kusy jedním tahem nebo speciální ovoce pošlou soupeři bombu navíc, šmouhu přes displej nebo zmrzlé ovoce.",
         "Po kole vyhrává vyšší skóre. Bombu nesekej."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "mlask",
@@ -106,7 +110,8 @@
         "Schováš nafukovací hračky do bazénu a hledáš soupeřovy.",
         "Každý tah jedna otázka. Kategorii ti vybral soupeř, obtížnost si zvolíš sám.",
         "Špatně je jedna rána, správně až čtyři. Za rychlou odpověď dostaneš i radar."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "psanicko",
@@ -168,7 +173,8 @@
         "Jeden kreslí, druhý hádá, pak se vystřídáte.",
         "Kreslíř si před kreslením vsadí, za kolik vteřin soupeř obrázek uhodne.",
         "Čím blíž sázka skutečnému času, tím víc bodů."
-      ]
+      ],
+      "solo": true
     }
   ]
 }
