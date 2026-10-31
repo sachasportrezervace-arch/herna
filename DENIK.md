@@ -2,6 +2,21 @@
 
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
+## 2026-10-31 – skutečné hry v živé místnosti (Čáranice, Ježkomet, Mlask!, Ovocný souboj)
+- **Hotovo:** `tests/mistnost-hry.cjs [hra ...] [URL Herny]` – hry `psanicko`, `caranice`, `jezci-prak`, `mlask`, `ovocny-souboj`; bez argumentu všechny postupně.
+  Ostrá Herna + ostrá hra + ostrý mantledb (Mark Chromium 1440×900, Radka WebKit iPhone 13). Jen Ježkomet (`?test` pro JPT) a Ovocný souboj (`?kolo=10`) dostanou do holého dokumentu
+  `history.replaceState` na ten parametr (route přepíše odpověď, nic jiného se nemění). Nové kontroly: nic z Herny nezakrývá ovládání hry (`elementFromPoint`), r má 6–16 znaků,
+  jména ve štítcích Psaníčka nejsou zkrácená (ff57e54), Ovocný souboj po obnovení iframe nezapočítá výsledek podruhé.
+- **Živě (Pages, příkazy `NODE_PATH="$(npm root -g)" node tests/mistnost-hry.cjs <hra>`):**
+  psanicko 35 PASS / 0 FAIL, exit 0 · jezci-prak 46/0, exit 0 · mlask 46/0, exit 0 · ovocny-souboj 48/0, exit 0 ·
+  **caranice 50 PASS / 1 FAIL, exit 1 (2× stejně, 51/1 podruhé)**. Ostatní kontroly Čáranice zelené: přepnutí, seat/zaklada, stejné r, bez výzvy, partie 0 : 6 (vítěz Radka), skóre 0 : 1 u obou, jeden záznam `g="caranice"` po 7 s, Jiná hra.
+- **Chyba Čáranice (neopraveno, jen popis):** na iPhonu 13 (okno 390×664, iframe v Herně 613 px, lišta 51 px) jsou na konci partie tlačítka „Odveta“ a „Jiná hra“ ořezaná dole (y 568–620 při výšce rámu 613).
+  Kroky: místnost → Čáranice → Mark se vždy vzdá, Radka vždy uhodne → po 6. kole výsledek (galerie se 3 kartami, u vzdání dvouřádková věta „Nic neuhodnuto. Umění se nevysvětluje.“). Čekám: tlačítka celá nad spodní hranou (vlastní test hry to nechytí, protože `scrollHeight` zůstane rovný výšce rámu).
+  Snímek `tests/shots/mistnost-caranice-konec-iphone.png`. Pozn. Herna: lišta má ve skutečnosti 51 px (48 + 3 px oranžový proužek), protokol říká 48.
+- **Lišta nezakrývá:** snímky `tests/shots/mistnost-<hra>-*.png` (Čáranice kresli/hada desktop i iPhone, ostatní start/hra/konec) prohlédnuty, vše se vejde. Kosmetika Ježkometu: žlutý banner „Prohráváš…“ na iPhonu překrývá část věže (hra sama).
+- **Ježkomet:** WebKit hlásí v konzoli „Viewport argument key interactive-widget not recognized“ (meta viewport hry, neškodné); test to nepočítá jako chybu JS.
+- **NEOVĚŘENO:** reálný iPhone, výhra Markova sedadla ani remíza u Čáranice (w=-1 jen z kódu testu), Ježkomet dohraný do zničení (jen výstřel + vzdání), Mlask/Ježkomet/Ovocný souboj 2× po sobě, `?test`/`?kolo=10` mění hry jen v testu.
+
 ## 2026-10-31 – skutečná hra (Psaníčko) v živé místnosti
 - **Hotovo:** `tests/mistnost-hry.cjs` – ostrá Herna + ostré Psaníčko + ostrý mantledb, žádné makety. Mark Chromium 1440×900, Radka WebKit iPhone 13.
   Ověřuje: založení a vstup, výběr Psaníčka, Radce se hra přepne sama, obě iframe `herna=1` se správným `seat`/`zaklada`/stejným `r`, bez výzvy a setupu,
