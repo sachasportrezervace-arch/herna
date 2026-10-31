@@ -2,6 +2,16 @@
 
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
+## 2026-10-31 – skutečná hra (Psaníčko) v živé místnosti
+- **Hotovo:** `tests/mistnost-hry.cjs` – ostrá Herna + ostré Psaníčko + ostrý mantledb, žádné makety. Mark Chromium 1440×900, Radka WebKit iPhone 13.
+  Ověřuje: založení a vstup, výběr Psaníčka, Radce se hra přepne sama, obě iframe `herna=1` se správným `seat`/`zaklada`/stejným `r`, bez výzvy a setupu,
+  skryté sdílení a odkazy ven, partie do pětky (Mark ×), skóre 1 : 0 v liště u obou, dokument místnosti `sk 1,0` a jeden záznam `g="psanicko"` i po 7 s,
+  „Jiná hra“ vrátí Radku do místnosti, rám pod lištou a deska se vejde (desktop i iPhone). Snímky `tests/shots/mistnost-psanicko-*.png`.
+- **Ověřeno živě (Pages 63cf78c):** `NODE_PATH="$(npm root -g)" node tests/mistnost-hry.cjs` → 33 PASS, 0 FAIL, exit 0 (2× po sobě). V Herně nebyla potřeba žádná oprava.
+- **Psaníčko (jen popis, neopraveno):** na iPhonu 390 px se ve štítku hráče jméno „Radka“ zkrátí na „Rad…“ (chip se štítkem „ty · na tahu“). Kosmetika.
+- **NEOVĚŘENO:** reálný iPhone, výhra Radky (sedadlo 1) a remíza, odveta v místnosti (v Herně počítaná přes `partie` r:2), přepnutí uprostřed partie u skutečné hry,
+  Psaníčko otevřené z úvodní karty mimo místnost.
+
 ## 2026-10-31 – místnost pro dva (#m=), protokol pro hry, Zkusit sám
 - **Hotovo (commit 30b8637, pushnuto s cf3b8a1):** `mistnost.js` = místnost `herna/#m=<id>` na mantledb `herna-<id>/mistnost`
   (jména, aktuální hra, skóre, posledních 30 partií, pojistka „Tohle je moje místnost, jsem Mark“, „Kdo tu hraje?“ pro třetí zařízení).
