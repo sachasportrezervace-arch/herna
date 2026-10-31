@@ -74,7 +74,8 @@
         "Střídáte se v hodech přes ulici. Úhel a sílu nastavíš tažením, vítr fouká pokaždé jinak.",
         "Po svém hodu tajně zvolíš, jak uhneš před dalším soupeřovým: přikrčit, uskočit, nebo chytit. Každá obrana platí na jiné hody.",
         "Kdo první spadne na nulu životů, prohrál."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "tancicky",
@@ -89,7 +90,8 @@
         "Nastav úhel a sílu, vystřel a trefuj soupeřův tank v kopcovitém terénu.",
         "Kolik životů soupeři ubereš, tolik dostaneš mincí. Před kolem za ně nakoupíš zbraně a vylepšení.",
         "Kolo končí zničením tanku, nebo po 16 tazích, kdy vyhrává víc životů."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "kvizove-lode",
@@ -99,7 +101,7 @@
       "barva": "#8ec5ec",
       "typ": "tahová",
       "delka": "~10 min",
-      "stav": "brzy",
+      "stav": "hraj",
       "pravidla": [
         "Schováš nafukovací hračky do bazénu a hledáš soupeřovy.",
         "Každý tah jedna otázka. Kategorii ti vybral soupeř, obtížnost si zvolíš sám.",
@@ -119,7 +121,8 @@
         "Klasické piškvorky, pět v řadě vyhrává.",
         "Při výzvě si dáte sázku, třeba o kafe.",
         "Ke každému tahu můžeš přidat krátký vzkaz a razítko. Skóre odvet se počítá."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "jamka-na-miru",
@@ -149,7 +152,8 @@
         "Házíte žetony do sloupců, vyhrává čtyři v řadě vodorovně, svisle nebo šikmo.",
         "Jednou za partii můžeš místo tahu otočit celou desku o 90°.",
         "Po otočení žetony spadnou dolů a z hotové pozice může být úplně jiná."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "caranice",

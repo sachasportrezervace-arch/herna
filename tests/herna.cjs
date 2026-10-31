@@ -53,14 +53,17 @@ async function scenar(browser, nazev, ctxOpts, stavy) {
 
   await page.goto(URL_, { waitUntil: "networkidle" });
   await page.waitForTimeout(800);
-  const karty = await page.$$eval(".hra", (l) => l.map((li) => ({ id: li.dataset.id, brzy: li.classList.contains("je-brzy"), href: (li.querySelector("a.hra-odkaz") || {}).href || null })));
+  const karty = await page.$$eval(".hra", (l) => l.map((li) => ({ id: li.dataset.id, brzy: li.classList.contains("je-brzy"), href: (li.querySelector("a.hra-odkaz") || {}).href || null, solo: (li.querySelector("a.hra-solo") || {}).href || null })));
   check(`${hryJson.hry.length} karet podle games.json`, karty.length === hryJson.hry.length, karty.length);
   for (const k of karty) {
     const s = stavy[k.id];
     const maBytHratelna = s.hraj && s.status === 200;
     check(`${k.id}: „${k.brzy ? "brzy" : "hraj"}“ odpovídá games.json + HTTP ${s.status}`, maBytHratelna === !k.brzy, k);
     if (!k.brzy) check(`${k.id}: odkaz vede na ${s.url}`, k.href === s.url, k.href);
+    const maSolo = !k.brzy && !!(hryJson.hry.find((h) => h.id === k.id) || {}).solo;
+    check(`${k.id}: „Zkusit sám“ ${maSolo ? "vede na #solo" : "není"}`, maSolo ? k.solo === s.url + "#solo" : k.solo === null, k.solo);
   }
+  check("pás „Místnost pro dva“ s tlačítkem Založit", await page.evaluate(() => !document.getElementById("pas").hidden && !!document.getElementById("pas-zalozit")));
   const prvniBrzy = karty.findIndex((k) => k.brzy);
   check("hratelné hry jsou napřed", prvniBrzy === -1 || karty.slice(prvniBrzy).every((k) => k.brzy), karty.map((k) => k.id));
   const mobil = (ctxOpts.viewport || {}).width < 600;
@@ -68,8 +71,10 @@ async function scenar(browser, nazev, ctxOpts, stavy) {
   check(mobil ? "iPhone: nápověda Přidat na plochu je vidět" : "desktop: nápověda Přidat na plochu skrytá", plocha === mobil, plocha);
   if (mobil) {
     const celych = await page.$$eval(".hra", (l) => l.filter((li) => li.getBoundingClientRect().bottom <= innerHeight).length);
-    const minimum = innerHeightOf(ctxOpts) >= 660 ? 3 : 2;
-    check(`první obrazovka: aspoň ${minimum} celé karty`, celych >= minimum, celych);
+    // Pás „Místnost pro dva“ je nad kartami (hlavní cesta ke hraní), proto o kartu méně než dřív.
+    const minimum = innerHeightOf(ctxOpts) >= 660 ? 2 : 1;
+    const pasCely = await page.$eval("#pas", (p) => p.getBoundingClientRect().bottom <= innerHeight);
+    check(`první obrazovka: celý pás místnosti a aspoň ${minimum} celé karty`, pasCely && celych >= minimum, { pasCely, celych });
   }
   await page.screenshot({ path: `${SHOTS}/${nazev}.png` });
   await page.screenshot({ path: `${SHOTS}/${nazev}-cela.png`, fullPage: true });
@@ -77,7 +82,7 @@ async function scenar(browser, nazev, ctxOpts, stavy) {
   // rozvržení
   const roz = await page.evaluate(() => {
     const sirka = document.documentElement.scrollWidth, vw = window.innerWidth;
-    const male = [...document.querySelectorAll("button, a.hra-odkaz, .hra")].map((el) => {
+    const male = [...document.querySelectorAll("button, a.hra-odkaz, a.hra-solo, a.tl, .hra")].map((el) => {
       const target = el.matches("a.hra-odkaz") ? el.closest(".hra") : el;
       const r = target.getBoundingClientRect();
       return { t: (el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 20), w: Math.round(r.width), h: Math.round(r.height) };

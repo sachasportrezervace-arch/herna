@@ -75,6 +75,140 @@ h1,h2,p{margin:0}
 .panel-hraj{display:flex;justify-content:center;align-items:center;min-height:54px;border-radius:16px;background:var(--ink);color:var(--paper);font-weight:800;font-size:18px;text-decoration:none}
 .panel-hraj[aria-disabled]{background:#e9dfcc;color:#5a5048}
 @media (prefers-reduced-motion:reduce){.panel-list,.panel-pozadi{transition:none}}
+/* Zkusit sám: sekundární odkaz vedle Pravidel */
+.hra-solo{position:relative;z-index:2;display:inline-flex;align-items:center;min-height:44px;margin:-6px 0;padding:0 4px;font-weight:800;color:var(--ink);text-decoration:underline dotted;text-underline-offset:3px}
+.je-brzy .hra-solo{display:none}
+.panel-solo{display:flex;justify-content:center;align-items:center;min-height:48px;margin-top:10px;border-radius:16px;border:2px solid var(--ink);color:var(--ink);font-weight:800;text-decoration:none}
+.panel-solo[hidden],.v-mistnost .panel-solo{display:none}
+/* Pás s místností na úvodu */
+/* Mobil: bez místnosti jeden řádek (ikona, text, Založit), s uloženou místností dvě řady. */
+.pas{margin:14px 14px 0;padding:10px 10px 10px 12px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ikona text akce";gap:10px;align-items:center;background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:22px}
+.pas[hidden]{display:none}
+.pas-ma{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"ikona text" "akce akce";padding:12px 12px 12px 14px;gap:12px}
+.pas-ikona{grid-area:ikona;width:52px;height:52px;border-radius:50%;background:#ffe0a8;border:3px solid var(--ink);display:grid;place-items:center}
+.pas-ikona svg{width:40px;height:40px}
+.pas-text{grid-area:text;min-width:0}
+.pas-stitek{display:none;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7a5424}
+.pas-ma .pas-stitek{display:block}
+.pas-nadpis{font-size:17px;font-weight:800;line-height:1.1;font-variation-settings:"opsz" 32;overflow-wrap:anywhere}
+.pas-popis{margin-top:2px;font-size:13.5px;line-height:1.3;color:#4a423b}
+.pas-akce{grid-area:akce;display:flex;gap:10px;align-items:center}
+.tl{display:inline-flex;justify-content:center;align-items:center;gap:6px;min-height:48px;padding:0 18px;border-radius:999px;border:3px solid var(--ink);background:var(--ink);color:var(--paper);font:inherit;font-weight:800;font-size:16px;text-decoration:none;cursor:pointer;white-space:nowrap}
+.tl svg{width:20px;height:20px}
+.tl-2{background:transparent;color:var(--ink)}
+.tl[disabled]{opacity:.6;cursor:default}
+.pas .tl{padding:0 16px}
+.pas-ma .tl{flex:1}
+.pas .tl-2{flex:0 0 auto}
+/* Místnost */
+.scena-mistnost{display:none}
+.v-mistnost .scena-text{display:none}
+.v-mistnost .scena-mistnost{display:block;position:relative;z-index:2;padding-bottom:30px}
+.v-mistnost .scena{min-height:0}
+.v-mistnost .dvojice{display:none}
+.mist-domu{display:inline-flex;align-items:center;min-height:44px;margin:-8px 0 0 -2px;font-size:15px;font-weight:800;color:var(--mut);text-decoration:none}
+.mist-domu::before{content:"";width:9px;height:9px;margin:0 9px 0 4px;border-left:3px solid currentColor;border-bottom:3px solid currentColor;transform:rotate(45deg)}
+.skore{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin-top:2px}
+.sk-jm{font-size:21px;font-weight:800;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variation-settings:"opsz" 32}
+.sk-jm:last-child{text-align:right}
+.sk-jm.je-ja::after{content:"ty";display:block;margin-top:2px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--hot)}
+.sk-cisla{display:flex;align-items:center;gap:8px;font-size:50px;font-weight:800;line-height:1;font-variation-settings:"opsz" 96;font-variant-numeric:tabular-nums}
+.sk-cisla b{min-width:1ch;text-align:center;display:inline-block}
+.sk-cisla i{font-style:normal;color:var(--hot)}
+.bod{animation:bod .8s ease-out}
+@keyframes bod{0%{transform:scale(1.6);color:var(--hot)}100%{transform:none}}
+.scena .mist-stav{max-width:none;margin-bottom:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:8px;font-size:14.5px;color:var(--mut);min-height:44px}
+.mist-pozvat{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 16px;border-radius:999px;border:2px solid var(--hot);background:transparent;color:var(--paper);font:inherit;font-weight:800;cursor:pointer}
+.mist-pozvat svg{width:18px;height:18px}
+.mist-pozvat[hidden]{display:none}
+.v-mistnost .hra-posl:not(.hra-ted),.v-mistnost .hra-solo{display:none}
+.hra-posl.hra-ted{background:var(--hot);color:var(--ink);border:2px solid var(--ink);padding:1px 8px}
+.v-mistnost .hra.je-ted{box-shadow:0 0 0 3px var(--night),0 0 0 6px var(--hot)}
+.ted{margin:14px 14px 0;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 10px 10px 12px;border-radius:22px;background:var(--c);color:var(--ink);border:3px solid var(--ink)}
+.ted[hidden]{display:none}
+.ted-ikona{width:50px;height:50px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);display:grid;place-items:center}
+.ted-ikona svg{width:38px;height:38px}
+.ted-stitek{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.ted-nazev{font-size:19px;font-weight:800;line-height:1.1;font-variation-settings:"opsz" 32}
+.historie{padding:0 20px 20px}
+.historie[hidden]{display:none}
+.historie h2{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
+.historie ol{list-style:none;margin:0;padding:0}
+.historie li{display:flex;justify-content:space-between;gap:12px;font-size:15px;padding:9px 0;border-bottom:1px solid #3a4272}
+.historie li span:last-child{font-weight:800;white-space:nowrap}
+/* Dialogy */
+.dlg-nadpis{font-size:25px;font-weight:800;line-height:1.08;font-variation-settings:"opsz" 32;padding-right:4px}
+.dlg-text{margin:10px 0 18px;font-size:16px;line-height:1.42;color:#4a423b}
+.dlg-akce{display:grid;gap:10px}
+.dlg-akce .tl{width:100%;min-height:54px;font-size:17px}
+.dlg-pole{display:grid;gap:6px;margin-bottom:14px;font-weight:700;font-size:15px}
+.dlg-pole input{min-height:52px;padding:0 14px;border-radius:14px;border:2px solid var(--ink);background:#fff;font:inherit;font-size:18px;font-weight:600;color:var(--ink);width:100%}
+.dlg-pole input:focus{outline:3px solid var(--hot);outline-offset:2px}
+.dlg-odkaz{display:block;margin-bottom:14px;padding:12px 14px;border-radius:14px;background:#f1e6d2;font-size:14px;font-weight:600;word-break:break-all;color:var(--ink);user-select:all;-webkit-user-select:all}
+.dlg-ikona{width:64px;height:64px;border-radius:50%;background:var(--c,#ffe0a8);border:3px solid var(--ink);display:grid;place-items:center;margin-bottom:14px}
+.dlg-ikona svg{width:48px;height:48px}
+.dlg-dvojice{display:flex;gap:6px;align-items:center;margin-bottom:14px}
+.dlg-dvojice .dlg-ikona{margin:0}
+/* Hra v rámu přes celou obrazovku */
+.ram{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;background:var(--night)}
+.ram[hidden]{display:none}
+.ram-lista{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:calc(2px + env(safe-area-inset-top)) 12px 2px 2px;min-height:48px;background:var(--night);color:var(--paper);border-bottom:3px solid var(--hot)}
+.ram-zpet{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 12px 0 8px;border:0;border-radius:999px;background:transparent;color:var(--paper);font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+.ram-zpet svg{width:22px;height:22px}
+.ram-zpet:focus-visible{outline:3px solid var(--hot)}
+.ram-nazev{flex:1;min-width:0;font-weight:800;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;color:var(--mut)}
+.ram-skore{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;white-space:nowrap}
+.ram-skore .rs-jm{overflow:hidden;text-overflow:ellipsis;max-width:8ch}
+.ram-skore b{font-size:18px;font-variant-numeric:tabular-nums;display:inline-block}
+.ram-skore i{font-style:normal;color:var(--hot)}
+.ram-telo{position:relative;flex:1 1 auto;min-height:0;margin-bottom:env(safe-area-inset-bottom)}
+.ram-telo iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--night)}
+.ram-telo iframe[hidden]{display:none}
+.ram-ceka{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;padding:24px;text-align:center;background:var(--night);color:var(--paper)}
+.ram-ceka[hidden]{display:none}
+.ram-ceka .dlg-ikona{width:96px;height:96px;margin-bottom:8px}
+.ram-ceka .dlg-ikona svg{width:72px;height:72px}
+.ram-ceka h2{font-size:26px;font-weight:800;line-height:1.1;font-variation-settings:"opsz" 32}
+.ram-ceka p{max-width:30ch;color:var(--mut);font-size:15.5px}
+.ram-ceka .tl{margin-top:16px;border-color:var(--paper);color:var(--paper)}
+.tecky{display:flex;gap:7px;margin-top:6px}
+.tecky i{width:10px;height:10px;border-radius:50%;background:var(--hot);animation:tecka 1.2s infinite ease-in-out}
+.tecky i:nth-child(2){animation-delay:.15s}.tecky i:nth-child(3){animation-delay:.3s}
+@keyframes tecka{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:none}}
+.ram-otevreny,.ram-otevreny body{overflow:hidden}
+/* Karta volby: krátce před přepnutím hry, nikdy přes běžící hru */
+.volba{position:fixed;inset:0;z-index:30;display:grid;place-content:center;justify-items:center;gap:4px;padding:24px;background:var(--c);color:var(--ink);text-align:center;opacity:0;transition:opacity .18s}
+.volba[hidden]{display:none}
+.volba.je-videt{opacity:1}
+.volba-ikona{width:128px;height:128px;border-radius:50%;background:var(--paper);border:4px solid var(--ink);display:grid;place-items:center;margin-bottom:14px;transform:scale(.8);transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+.volba.je-videt .volba-ikona{transform:none}
+.volba-ikona svg{width:98px;height:98px}
+.volba-kdo{font-size:18px;font-weight:700}
+.volba-hra{font-size:46px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variation-settings:"opsz" 96}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));z-index:40;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);padding:12px 18px;border-radius:16px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);font-weight:700;font-size:15px}
+.toast[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.volba,.volba-ikona{transition:none}.bod,.tecky i{animation:none}}
+@media (min-width:960px){
+  .pas{margin:28px 40px 0;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ikona text akce";padding:16px 18px 16px 18px;gap:18px}
+  .pas-ikona{width:68px;height:68px}.pas-ikona svg{width:52px;height:52px}
+  .pas-nadpis{font-size:23px}.pas-popis{font-size:15.5px}
+  .pas,.pas-ma{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ikona text akce"}
+  .pas-stitek{display:block}
+  .pas .tl,.pas-ma .tl{flex:0 0 auto;padding:0 20px}
+  .v-mistnost .scena-mistnost{grid-area:t;align-self:end;padding-bottom:40px}
+  .v-mistnost .dvojice{display:block}
+  .skore{display:flex;align-items:center;gap:28px}
+  .sk-jm{font-size:36px}.sk-jm:last-child{text-align:left}
+  .sk-cisla{font-size:104px;gap:16px}
+  .scena .mist-stav{font-size:17px;margin-top:14px;margin-bottom:0}
+  .ted{margin:28px 40px 0;padding:12px 14px 12px 16px}
+  .ted-ikona{width:60px;height:60px}.ted-ikona svg{width:46px;height:46px}
+  .ted-nazev{font-size:23px}
+  .historie{padding:0 40px 32px;max-width:720px}
+  .ram-nazev{font-size:16px}
+  .volba-hra{font-size:80px}
+  .volba-ikona{width:170px;height:170px}.volba-ikona svg{width:130px;height:130px}
+}
 @media (min-width:960px){
   .scena{min-height:0;max-width:1240px;margin:0 auto;padding:48px 40px 0;display:grid;grid-template-columns:1fr 420px;grid-template-areas:"t d" "pult pult";overflow:visible}
   .dvojice{grid-area:d;align-self:end}
@@ -108,10 +242,22 @@ h1,h2,p{margin:0}
       <h1>Herna</h1>
       <p>Hry pro dva na jednom odkazu.<span class="jen-desktop"> Vyber hru, založ výzvu a pošli ji.</span></p>
     </div>
+    <div class="scena-mistnost">
+      <a class="mist-domu" href="./">Herna</a>
+      <div class="skore" aria-live="polite">
+        <span class="sk-jm" id="sk-j0"></span>
+        <span class="sk-cisla"><b id="sk-0">0</b><i aria-hidden="true">:</i><b id="sk-1">0</b></span>
+        <span class="sk-jm" id="sk-j1"></span>
+      </div>
+      <p class="mist-stav"><span id="mist-stav">Načítám místnost…</span> <button class="mist-pozvat" id="mist-pozvat" type="button" hidden><svg aria-hidden="true"><use href="#i-odkaz"/></svg>Poslat odkaz</button></p>
+    </div>
     <svg class="dvojice" viewBox="0 0 260 150" role="img" aria-label="Kluk a holka čelo na čele"><use href="#i-dvojice"/></svg>
-      </header>
+  </header>
   <main>
+    <section id="pas" class="pas" hidden></section>
+    <div id="ted" class="ted" hidden></div>
     <ul id="hry" class="hry"></ul>
+    <section id="historie" class="historie" hidden><h2>Poslední partie</h2><ol id="historie-seznam"></ol></section>
   </main>
   <footer class="pata">
     <p>Hra se zakládá až uvnitř. Odkaz s výzvou pak pošleš do chatu.</p>
@@ -128,9 +274,31 @@ h1,h2,p{margin:0}
     </div>
     <ol class="panel-pravidla"></ol>
     <a class="panel-hraj"></a>
+    <a class="panel-solo" hidden>Zkusit sám</a>
   </div>
 </div>
+<div id="dlg" class="panel dlg" hidden role="dialog" aria-modal="true" aria-labelledby="dlg-nadpis">
+  <div class="panel-pozadi" data-dlg-zavri></div>
+  <div class="panel-list"><div class="dlg-obsah"></div></div>
+</div>
+<div id="ram" class="ram" hidden>
+  <div class="ram-lista">
+    <button class="ram-zpet" id="ram-zpet" type="button"><svg aria-hidden="true"><use href="#i-zpet"/></svg>Místnost</button>
+    <span class="ram-nazev" id="ram-nazev"></span>
+    <span class="ram-skore" id="ram-skore" aria-live="polite"></span>
+  </div>
+  <div class="ram-telo" id="ram-telo">
+    <div class="ram-ceka" id="ram-ceka" hidden></div>
+  </div>
+</div>
+<div id="volba" class="volba" hidden aria-live="assertive">
+  <span class="volba-ikona"></span>
+  <p class="volba-kdo"></p>
+  <p class="volba-hra"></p>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <script src="ikony.js"></script>
 <script src="app.js"></script>
+<script src="mistnost.js"></script>
 </body>
 </html>

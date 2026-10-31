@@ -1,4 +1,5 @@
 // Herna: vykreslí hry z games.json, ověří dostupnost (HEAD), pamatuje si naposledy hranou hru a ukáže pravidla.
+// Místnost (mistnost.js) se napojí přes window.Herna.
 (function () {
   var seznam = document.getElementById("hry");
   var zdroj = seznam.getAttribute("data-zdroj") || "games.json";
@@ -43,7 +44,9 @@
       "</div>" +
       '<div class="hra-meta"><span class="hra-typ hra-typ-' + (h.typ === "živá" ? "ziva" : "tahova") + '">' + esc(h.typ) + "</span>" +
       '<span class="hra-delka">' + esc(h.delka) + "</span>" +
-      '<button class="hra-pravidla" type="button" data-pravidla="' + esc(h.id) + '" aria-label="Pravidla: ' + esc(h.nazev) + '">Pravidla</button></div>' +
+      '<button class="hra-pravidla" type="button" data-pravidla="' + esc(h.id) + '" aria-label="Pravidla: ' + esc(h.nazev) + '">Pravidla</button>' +
+      (hraj && h.solo ? '<a class="hra-solo" href="' + esc(h.url) + '#solo" aria-label="Zkusit sám: ' + esc(h.nazev) + '">Zkusit sám</a>' : "") +
+      "</div>" +
       (hraj
         ? '<span class="hra-akce" aria-hidden="true">Hraj<svg><use href="#i-sipka"/></svg></span>'
         : '<span class="hra-akce hra-brzy">Brzy</span>') +
@@ -57,7 +60,9 @@
     var serazene = hry.filter(function (h) { return h.stav === "hraj"; })
       .concat(hry.filter(function (h) { return h.stav !== "hraj"; }));
     seznam.innerHTML = serazene.map(function (h) { return karta(h, posl); }).join("");
+    poVykresleni.forEach(function (f) { f(); });
   }
+  var poVykresleni = [], poNacteni = [];
 
   // Pojistka: hra „hraj“, jejíž stránka vrací 404, se zamkne. Odemyká jen games.json
   // (tools/stavy.cjs ověří, že se hra opravdu načte). Bez sítě platí hodnota z games.json.
@@ -84,7 +89,10 @@
     panel.querySelector(".panel-pravidla").innerHTML = (h.pravidla || []).map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("");
     var tl = panel.querySelector(".panel-hraj");
     if (h.stav === "hraj") { tl.href = h.url; tl.setAttribute("data-id", h.id); tl.removeAttribute("aria-disabled"); tl.textContent = "Hraj " + h.nazev; }
-    else { tl.removeAttribute("href"); tl.setAttribute("aria-disabled", "true"); tl.textContent = "Brzy"; }
+    else { tl.removeAttribute("href"); tl.removeAttribute("data-id"); tl.setAttribute("aria-disabled", "true"); tl.textContent = "Brzy"; }
+    var solo = panel.querySelector(".panel-solo");
+    solo.hidden = !(h.stav === "hraj" && h.solo);
+    solo.href = h.url + "#solo";
     panel.hidden = false;
     document.documentElement.classList.add("panel-otevreny");
     requestAnimationFrame(function () { panel.classList.add("je-otevreny"); });
@@ -118,9 +126,19 @@
       var zaklad = data.zaklad || "";
       hry = data.hry.map(function (h) { h.url = h.url || zaklad + h.id + "/"; return h; });
       vykresli();
+      poNacteni.forEach(function (f) { f(); });
       if (!seznam.hasAttribute("data-bez-kontroly")) overDostupnost();
     })
     .catch(function () {
       seznam.innerHTML = '<li class="chyba">Seznam her se nenačetl. Zkus stránku obnovit.</li>';
     });
+
+  window.Herna = {
+    esc: esc,
+    hra: function (id) { return hry.filter(function (h) { return h.id === id; })[0] || null; },
+    nacteno: function () { return hry.length > 0; },
+    poNacteni: function (f) { if (hry.length) f(); poNacteni.push(f); },
+    poVykresleni: function (f) { poVykresleni.push(f); },
+    zavriPanel: zavriPanel
+  };
 })();

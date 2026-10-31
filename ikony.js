@@ -91,7 +91,15 @@
       '<path d="M48 10 L58 17 L61 12.5 Q62 9 58 6.5 L55 4.5 Q52 3 50 6 Z" fill="#f28aa0" ' + S + '/>' +
       '<path d="M24 44 L34 51 L22 56 Z" fill="#f6dcb6" ' + S + '/>',
     // šipka do hry
-    sipka: '<path d="M16 32 H46 M34 20 L46 32 L34 44" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>'
+    sipka: '<path d="M16 32 H46 M34 20 L46 32 L34 44" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>',
+    // zpět do místnosti
+    zpet: '<path d="M48 32 H18 M30 20 L18 32 L30 44" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>',
+    // odkaz (dva články řetězu)
+    odkaz: '<path d="M28 36 a9 9 0 0 0 12.7 0 l8 -8 a9 9 0 0 0 -12.7 -12.7 l-3 3 M36 28 a9 9 0 0 0 -12.7 0 l-8 8 a9 9 0 0 0 12.7 12.7 l3 -3" fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>',
+    // místnost: dvě židle u stolku
+    mistnost: '<path d="M10 30 H54" ' + S + ' fill="none"/><path d="M18 30 V52 M46 30 V52" ' + S + ' fill="none"/>' +
+      '<rect x="6" y="12" width="14" height="14" rx="3" fill="#ffb23f" ' + S + '/><rect x="44" y="12" width="14" height="14" rx="3" fill="#f5a8bf" ' + S + '/>' +
+      '<circle cx="32" cy="22" r="6" fill="#fff8ee" ' + S + '/>'
   };
   var html = '<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0" aria-hidden="true">';
   for (var k in sym) html += '<symbol id="i-' + k + '" viewBox="0 0 64 64">' + sym[k] + '</symbol>';
