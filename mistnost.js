@@ -315,9 +315,10 @@
     var v = vede(), o = Math.abs(stav.sk[0] - stav.sk[1]), ser = serie(stav.log);
     var t = v < 0 ? "Vyrovnáno, další partie rozhodne."
       : esc(stav.n[v]) + (o >= 5 ? " ujíždí o " : o >= 3 ? " utíká o " : " vede o ") + o + (ser.n && ser.s === 1 - v ? ", " + esc(stav.n[1 - v]) + " dotahuje." : ".");
+    // Štítek série: jméno jen při remíze, jinak ho už říká věta (vede / dotahuje).
     if (ser.n >= 2) {
-      t += ' <span class="serie' + (ser.n >= 3 ? " serie-hot" : "") + '"><svg aria-hidden="true"><use href="#i-serie"/></svg>' +
-        esc(stav.n[ser.s]) + " · " + (ser.n === 3 ? "hattrick" : ser.n + "× v řadě") + "</span>";
+      t = "<span>" + t + '</span><span class="serie' + (ser.n >= 3 ? " serie-hot" : "") + '"><svg aria-hidden="true"><use href="#i-serie"/></svg>' +
+        (v < 0 ? esc(stav.n[ser.s]) + " · " : "") + (ser.n === 3 ? "hattrick" : ser.n + "× v řadě") + "</span>";
     }
     return t;
   }
@@ -329,7 +330,8 @@
     var px = 0;
     if (v >= 0) { var b = $("sk-" + v).getBoundingClientRect(); px = Math.round(b.left + b.width / 2 - (c.left + c.width / 2)); }
     p.style.setProperty("--px", px + "px");
-    p.style.setProperty("--rot", v < 0 ? "-14deg" : "0deg");
+    p.style.setProperty("--rot", v < 0 ? "-13deg" : "0deg");
+    p.classList.toggle("remiza", v < 0);
     p.classList.add("je-videt");
   }
   window.addEventListener("resize", function () { if (stav && $("ram").hidden) postavPohar(); });

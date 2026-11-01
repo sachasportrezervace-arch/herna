@@ -117,11 +117,15 @@ h1,h2,p{margin:0}
 .sk-cisla i{font-style:normal;color:var(--hot)}
 .sk-cisla{position:relative}
 /* Putovní pohár nad číslem toho, kdo vede; při remíze stojí uprostřed nakřivo. --px posouvá mistnost.js. */
-.pohar{position:absolute;left:50%;top:-25px;width:30px;height:30px;opacity:0;transform:translateX(calc(-50% + var(--px,0px))) rotate(var(--rot,0deg));transition:transform .7s cubic-bezier(.3,1.5,.5,1),opacity .3s}
+.pohar{position:absolute;left:50%;top:-33px;width:40px;height:40px;opacity:0;transform:translateX(calc(-50% + var(--px,0px)));rotate:var(--rot,0deg);transform-origin:50% 90%;transition:transform .7s cubic-bezier(.3,1.5,.5,1),rotate .5s,opacity .3s}
 .pohar.je-videt{opacity:1}
-.serie{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 6px;border-radius:999px;background:var(--night2);color:var(--paper);font-weight:800;font-size:13.5px;white-space:nowrap}
+/* Remíza: pohár nikomu nepatří a houpe se uprostřed. */
+.pohar.remiza{animation:houpe 2.6s ease-in-out infinite}
+@keyframes houpe{0%,100%{rotate:-13deg}50%{rotate:11deg}}
+#mist-stav{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.serie{display:inline-flex;align-items:center;gap:5px;padding:2px 10px 2px 5px;border-radius:999px;border:2px solid #6f78b0;background:var(--night2);color:var(--paper);font-weight:800;font-size:13.5px;white-space:nowrap}
 .serie svg{width:20px;height:20px}
-.serie-hot{background:var(--hot);color:var(--ink)}
+.serie-hot{background:var(--hot);border-color:var(--hot);color:var(--ink)}
 .serie-hot svg{animation:plamen 1.4s ease-in-out infinite;transform-origin:50% 90%}
 @keyframes plamen{0%,100%{transform:rotate(-6deg) scaleY(1)}50%{transform:rotate(5deg) scaleY(1.12)}}
 .bod{animation:bod .8s ease-out}
@@ -152,6 +156,20 @@ h1,h2,p{margin:0}
 .dl-hra.je-ted .dl-ikona{box-shadow:0 0 0 3px var(--night),0 0 0 6px var(--hot)}
 .dl-hra.je-ted .dl-nazev{color:var(--hot)}
 .v-mistnost .pata-uvod{display:none}
+.v-mistnost .scena::after{height:8px}
+.v-mistnost .scena-mistnost{padding-bottom:20px}
+/* Úzké telefony (SE): Pokračovat se nesmí srazit s názvem hry, dlaždice po čtyřech. */
+@media (max-width:360px){
+  .ted{gap:9px;padding:8px 8px 8px 9px}
+  .ted-ikona{width:40px;height:40px}.ted-ikona svg{width:30px;height:30px}
+  .ted-stitek{font-size:10.5px;letter-spacing:.04em;white-space:nowrap}
+  .ted-nazev{font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ted .tl{padding:0 14px;font-size:15px}
+  .dalsi{margin:10px 10px 0}
+  .dalsi ul{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .dl-ikona{width:48px;height:48px}.dl-ikona svg{width:36px;height:36px}
+  .dl-nazev{font-size:11.5px}
+}
 .historie{padding:0 20px 20px}
 .historie[hidden]{display:none}
 .historie h2{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
@@ -184,6 +202,10 @@ h1,h2,p{margin:0}
 .ram-skore b{font-size:18px;font-variant-numeric:tabular-nums;display:inline-block}
 .ram-skore i{font-style:normal;color:var(--hot)}
 .ram-skore svg{width:20px;height:20px;flex:none}
+/* Celkové skóre místnosti, ne skóre hry: tišší a s popiskem, ať nesoupeří s HUD hry pod ním. */
+.ram-skore{color:var(--mut)}
+.ram-skore::before{content:"celkem";font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.8;margin-right:2px}
+.ram-skore b{color:var(--paper)}
 .ram-skore b.bod{animation:bod .8s ease-out}
 /* iframe nikdy pod výřezem ani pod domácím proužkem: hra uvnitř rámu safe-area nevidí */
 .ram-telo{position:relative;flex:1 1 auto;min-height:0;margin:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
@@ -222,6 +244,22 @@ h1,h2,p{margin:0}
   .ram-zpet{flex-direction:column;gap:0;min-height:52px;padding:2px 4px;font-size:11.5px}
   .ram-nazev{display:none}
   .ram-skore{flex-direction:column;gap:1px;margin:0;font-size:12px}
+  .ram-skore::before{font-size:9.5px;margin:0 0 2px}
+  /* Místnost na šířku: hlavička v jednom pásu, Teď hrajete schované (hra je označená v dlaždicích), 11 ikon v jedné řadě. */
+  .v-mistnost .scena{padding-top:calc(6px + env(safe-area-inset-top))}
+  .v-mistnost .scena-mistnost{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"domu skore" "stav stav";align-items:center;column-gap:20px;padding-bottom:14px}
+  .mist-domu{grid-area:domu;margin:0}
+  .skore{grid-area:skore;margin-top:28px}
+  .sk-jm{font-size:18px}.sk-jm::after{display:none!important}
+  .sk-cisla{font-size:38px}
+  .pohar{top:-26px;width:30px;height:30px}
+  .scena .mist-stav{grid-area:stav;margin-top:2px;min-height:0;font-size:13.5px}
+  .v-mistnost .scena::after{height:6px;border-top-width:2px}
+  .v-mistnost .ted{display:none}
+  .dalsi{margin-top:10px}
+  .dalsi ul{grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
+  .dl-ikona{width:48px;height:48px}.dl-ikona svg{width:36px;height:36px}
+  .dl-nazev{font-size:11.5px}
   .ram-skore .rs-jm{max-width:60px}
   .ram-skore i{line-height:.6}
   .ram-telo{margin:0 env(safe-area-inset-right) env(safe-area-inset-bottom) 0}
@@ -229,7 +267,7 @@ h1,h2,p{margin:0}
 /* Na šířku s výřezem: obsah místnosti a panely mimo výřez. */
 .stranka{padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
 .panel-list{padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
-@media (prefers-reduced-motion:reduce){.volba,.volba-ikona,.pohar,.dl-ikona{transition:none}.bod,.tecky i,.serie-hot svg,.ram-skore b.bod{animation:none}}
+@media (prefers-reduced-motion:reduce){.volba,.volba-ikona,.pohar,.dl-ikona{transition:none}.bod,.tecky i,.serie-hot svg,.ram-skore b.bod,.pohar.remiza{animation:none}}
 @media (min-width:960px){
   .pas{margin:28px 40px 0;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ikona text akce";padding:16px 18px 16px 18px;gap:18px}
   .pas-ikona{width:68px;height:68px}.pas-ikona svg{width:52px;height:52px}
@@ -246,7 +284,9 @@ h1,h2,p{margin:0}
   .ted{margin:28px 40px 0;padding:12px 14px 12px 16px}
   .ted-ikona{width:60px;height:60px}.ted-ikona svg{width:46px;height:46px}
   .ted-nazev{font-size:23px}
-  .pohar{top:-40px;width:46px;height:46px}
+  .pohar{top:-44px;width:54px;height:54px}
+  .v-mistnost .scena::after{height:22px}
+  .v-mistnost .scena-mistnost{padding-bottom:40px}
   .serie{font-size:15px;padding:4px 12px 4px 7px}.serie svg{width:22px;height:22px}
   .dalsi{margin:28px 40px 0}
   .dalsi ul{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}

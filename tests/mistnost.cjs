@@ -226,7 +226,7 @@ async function rozvrzeni(page, nazev) {
   check("po obnovení: bez dialogu, Mark na svém místě, skóre 1 : 1", (await a.$eval("#dlg", (e) => e.hidden)) && await a.$eval("#sk-j0", (e) => e.classList.contains("je-ja")) && (await a.textContent("#sk-0")) === "1" && (await a.textContent("#sk-1")) === "1");
   check("poslední partie: 2 řádky", (await a.$$("#historie-seznam li")).length === 2);
   const rem = await a.evaluate(() => ({ stav: document.getElementById("mist-stav").textContent, pohar: document.getElementById("pohar").classList.contains("je-videt"), rot: document.getElementById("pohar").style.getPropertyValue("--rot") }));
-  check("remíza 1 : 1: „Vyrovnáno“, pohár uprostřed nakřivo", /^Vyrovnáno/.test(rem.stav) && rem.pohar && rem.rot === "-14deg", rem);
+  check("remíza 1 : 1: „Vyrovnáno“, pohár uprostřed nakřivo", /^Vyrovnáno/.test(rem.stav) && rem.pohar && rem.rot === "-13deg", rem);
   const man = await (await fetch(new URL("manifest.webmanifest", URL_))).json();
   check("manifest bez start_url (z plochy se otevře uložená místnost)", !("start_url" in man), man.start_url);
   await a.screenshot({ path: `${SHOTS}/mistnost-skore-desktop.png` });
