@@ -3,6 +3,23 @@
 PŘEVZATO 1. 11. – kolo vylepšení, session herna-kolo (rozcestník); jiná session sem nepíše.
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
+## 2026-11-01 – kolo vylepšení: souboj místnosti, Další hra, iPhone na šířku, všech 11 her
+- **Hotovo (c993b43, 59ee762, test 2d1b147):**
+  - **Putovní pohár** nad číslem vedoucího (při remíze se houpe uprostřed, při změně vedení přejede).
+  - Věta pod skóre („Radka vede o 1.“, „Mark utíká o 4.“, „ujíždí“ od 5, „… dotahuje“, „Vyrovnáno, další partie rozhodne.“). Štítek série s plamenem: „2× v řadě“, od 3 oranžový „hattrick“.
+  - V liště rámu je malý pohár u vedoucího, „celkem“ a poskočení čísla při bodu.
+  - **Další hra:** 11 kulatých dlaždic hned pod hlavičkou (ťuk = volba hry). Po návratu z hry místnost skočí nahoru. Po dohrané partii se „Teď hrajete“ schová a hra je označená kroužkem v dlaždicích.
+  - **iPhone:** rám i místnost respektují safe-area (výřez na šířku, domácí proužek). Telefon na šířku: lišta Herny je sloupec vlevo 66 px a hra má celou výšku (778×390). Místnost na šířku je v jednom pásu se všemi ikonami v řadě. SE: dlaždice po čtyřech.
+  - Manifest je bez `start_url`, na plochu se tak uloží otevřená místnost `#m=…`.
+- **Ověřeno živě (Pages 59ee762):**
+  - `NODE_PATH="$(npm root -g)" node tests/mistnost.cjs` 56 PASS / 0 FAIL, exit 0. Nové kontroly: věta a pohár nad vedoucím, návrat nahoru, dlaždice v okně iPhonu, přepnutí dlaždicí, otočení na šířku a zpět s běžící hrou, remíza, manifest.
+  - `node tests/herna.cjs` 252 PASS / 0 FAIL, exit 0.
+- **Všech 11 her v místnosti** (`tests/mistnost-hry.cjs` umí nově `zviratka-sogi`, `kvizove-lode`, `ctyrka-s-otockou`, bez argumentu běží všech 11): flotila 40/0, Čtyřka 41/0, šógi 36/5 (2 běhy shodně). Ostatních 8 her dříve zelených, dnes je kvůli limitu znovu nespouštím.
+- **Porušení protokolu – Zvířátkové šógi:** v rámu 613 px (iPhone 13) jde stránka odrolovat (start o 48 px, partie o 92 px, konec o 332 px) a „Jiná hra“ (#endOther) je pod spodní hranou. Desktop na konci odroluje o 373 px. Výsledek a Jiná hra jinak fungují. Snímky `tests/shots/mistnost-zviratka-sogi-*.png`. Nahlášeno nadřazené session, opravu musí udělat sogi-kolo.
+- **Ostatní hry (kosmetika):** Čtyřka na výšku má odznaky ↻ u avatarů přes nadpis „Čekáme na soupeře“.
+- **Design-eye:** kolo 1 „OK s výhradami“ (2 HIGH: místnost na šířku, SE 320; 4 MEDIUM/LOW), vše opraveno v 59ee762. Kolo 2 „OK s výhradami, blízko silné“ (mobil na výšku i desktop profi): MEDIUM (jména na šířku daleko od skóre) opraveno v dalším commitu. Otevřené LOW: SE 320 má useknuté popisky třetí řady dlaždic, lišta v rámu řadí jména podle sedadel (hra podle „ty“), pohár na desktopu ověřit živě. Kolo 3 se nespouštělo (šetření limitu).
+- **NEOVĚŘENO:** reálný iPhone (Přidat na plochu z místnosti, jestli Safari bez `start_url` opravdu uloží `#m=` a zda z plochy sdílí localStorage, jinak „Kdo tu hraje?“ jednou), skutečné otočení v Safari (750×342 s lištami), animace poháru živě, klávesnice na dlaždicích.
+
 ## 2026-11-01 – Jamka na míru hratelná v Herně
 - **Hotovo:** `tools/stavy.cjs --zapis` přepnul `jamka-na-miru` na HRAJ se sólem (v games.json se změnil jen stav a solo), `tests/mistnost-hry.cjs` umí `jamka-na-miru` (celá partie 6 jamek skriptem, iPhone 13 v rámu 390×613: výběr pasti všech karet, výsledek jamky, úder, konec partie, Odveta a Jiná hra). Commit 0d18cae, Pages built.
 - **Živě:** `NODE_PATH="$(npm root -g)" node tests/mistnost-hry.cjs jamka-na-miru` **49 PASS / 0 FAIL, exit 0** · `node tests/herna.cjs` **252 PASS / 0 FAIL, exit 0**. Chyba Jamky: žádná.

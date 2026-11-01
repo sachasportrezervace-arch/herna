@@ -249,8 +249,9 @@ h1,h2,p{margin:0}
   .v-mistnost .scena{padding-top:calc(6px + env(safe-area-inset-top))}
   .v-mistnost .scena-mistnost{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"domu skore" "stav stav";align-items:center;column-gap:20px;padding-bottom:14px}
   .mist-domu{grid-area:domu;margin:0}
-  .skore{grid-area:skore;margin-top:28px}
-  .sk-jm{font-size:18px}.sk-jm::after{display:none!important}
+  .skore{grid-area:skore;margin-top:28px;display:flex;justify-content:center;gap:20px}
+  .sk-jm{font-size:18px;flex:0 1 auto}.sk-jm:last-child{text-align:left}
+  .sk-jm::after{font-size:10.5px}
   .sk-cisla{font-size:38px}
   .pohar{top:-26px;width:30px;height:30px}
   .scena .mist-stav{grid-area:stav;margin-top:2px;min-height:0;font-size:13.5px}
