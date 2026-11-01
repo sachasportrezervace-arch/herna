@@ -2,6 +2,10 @@
 
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
+## 2026-11-01 – Jamka na míru hratelná v Herně
+- **Hotovo:** `tools/stavy.cjs --zapis` přepnul `jamka-na-miru` na HRAJ se sólem (v games.json se změnil jen stav a solo), `tests/mistnost-hry.cjs` umí `jamka-na-miru` (celá partie 6 jamek skriptem, iPhone 13 v rámu 390×613: výběr pasti všech karet, výsledek jamky, úder, konec partie, Odveta a Jiná hra). Commit 0d18cae, Pages built.
+- **Živě:** `NODE_PATH="$(npm root -g)" node tests/mistnost-hry.cjs jamka-na-miru` **49 PASS / 0 FAIL, exit 0** · `node tests/herna.cjs` **252 PASS / 0 FAIL, exit 0**. Chyba Jamky: žádná.
+
 ## 2026-10-31 – Kafíčka a Tančíky v živé místnosti, Čáranice znovu
 - **Hotovo:** `tests/mistnost-hry.cjs` umí i `kaficka` (živě f42fd1d) a `tancicky` (živě 7c734df); bez argumentu běží všech sedm her. Kafíčka se hrají z DOM (klik na políčko, Položit, výběr hrnku, Podat; Mark vyhrává, Radka podává vítězné hrnky), Tančíky přes `window.__tanc` + `TankEngine.suggestShot` (celý zápas, 32 tahů).
 - **Živě (Pages, `NODE_PATH="$(npm root -g)" node tests/mistnost-hry.cjs <hra>`):**
