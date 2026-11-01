@@ -1,5 +1,5 @@
 // Skutečná hra v živé místnosti Herny: node tests/mistnost-hry.cjs [psanicko|caranice ...] [URL Herny]
-// Bez názvu hry se spustí všechny hry postupně (psanicko, caranice, jezci-prak, mlask, ovocny-souboj, kaficka, tancicky, jamka-na-miru). Výchozí URL je živá Herna.
+// Bez názvu hry se spustí všechny hry postupně (psanicko, caranice, jezci-prak, mlask, ovocny-souboj, kaficka, tancicky, jamka-na-miru, zviratka-sogi, kvizove-lode, ctyrka-s-otockou). Výchozí URL je živá Herna.
 // Playwright z globální instalace (NODE_PATH = npm root -g). Mark v Chromiu 1440×900, Radka ve WebKitu iPhone 13.
 // Žádné makety a žádné přepisy games.json: je to ostrá Herna, ostrá hra i ostrý mantledb.
 // Ověří: založení, vstup Radky, výběr hry, automatické přepnutí Radce (herna=1, seat, zaklada, stejné r), žádná výzva ani setup,
@@ -730,6 +730,228 @@ const JAMKA = {
 JAMKA.fit = JAMKA.fit.bind(JAMKA);
 JAMKA.ovladani = JAMKA.ovladani.bind(JAMKA);
 
+// ───────────────────────── Zvířátkové šógi (zviratka-sogi) ─────────────────────────
+// Hra žádný testovací háček nevystavuje, hraje se přes DOM (klik na pole / figurku v zásobě). Tahy plánuje živý engine.js hry
+// (stáhne se z GitHub Pages a vyhodnotí v Node): nejkratší řada tahů, po které vyhraje „o“ = Radka (sedadlo 1) chycením lva nebo lvem v cíli.
+// Zakladatel (Mark) je „x“; kdo táhne první, říká dokument hry na mantledb (zviratka-<r>/hra, g.s). Tah = dva kliky (odkud, kam), nebo (figurka ze zásoby, kam).
+async function sgEngine() {
+  const t = await (await fetch(ZIVA.replace(/herna\/$/, "") + "zviratka-sogi/engine.js", { cache: "no-store" })).text();
+  const m = { exports: {} };
+  new Function("module", t)(m);
+  return m.exports;
+}
+// nejkratší platná řada tahů (zápis jako v dokumentu: m<z><na> / d<typ><na>), po které vyhraje `winner` (lev chycen, nebo lev v cíli)
+function sgLine(S, vr, starter, winner, maxPly = 9) {
+  const s0 = S.initial(starter, vr);
+  let level = [{ s: s0, m: [] }];
+  const seen = new Set([S.key(s0)]);
+  for (let d = 0; d < maxPly; d++) {
+    const next = [];
+    for (const n of level) for (const mv of S.moves(n.s)) {
+      const r = S.apply(n.s, mv), m = [...n.m, S.enc(mv)];
+      if (r.info.lionCaught || r.info.lionHome) { if (r.info.p === winner) return m; continue; }
+      const k = S.key(r.s);
+      if (seen.has(k)) continue;
+      seen.add(k); next.push({ s: r.s, m });
+    }
+    level = next;
+  }
+  throw new Error(`žádná řada do ${maxPly} tahů pro ${vr}/${starter}/${winner}`);
+}
+const sgMuj = (P) => P.f.waitForFunction(() => document.title.startsWith("Jsi na tahu"), null, { timeout: 30000 });
+async function sgTah(P, O, m, posledni) {
+  await sgMuj(P);
+  if (m[0] === "m") { await P.f.locator(`#board .cell[data-i="${parseInt(m[1], 12)}"]`).click(); await P.f.locator(`#board .cell[data-i="${parseInt(m[2], 12)}"]`).click(); }
+  else { await P.f.locator(`#seatBot .hp[data-t="${m[1]}"]`).first().click(); await P.f.locator(`#board .cell[data-i="${parseInt(m[2], 12)}"]`).click(); }
+  if (posledni) await O.f.waitForSelector("#endBox:not([hidden])", { timeout: 30000 }); else await sgMuj(O);
+}
+const SOGI = {
+  id: "zviratka-sogi",
+  nazev: "Zvířátkové šógi",
+  vitez: 1, // Radka (o) chytí lva
+  skryteIds: ["soloBtn", "share", "fsBtn", "setup", "intro", "mCopy", "mNew", "infoNew"],
+  async pripravena(P) { await P.f.waitForFunction(() => { const g = document.getElementById("game"); return g && !g.hidden && g.checkVisibility(); }, null, { timeout: 40000 }); },
+  async bezUi(P) { return !(await P.f.locator("#setup").isVisible()) && !(await P.f.locator("#intro").isVisible()) && !(await P.f.locator("#share").isVisible()) && !(await P.f.locator("#soloBtn").isVisible()); },
+  jmena: (P) => P.f.evaluate(() => (document.querySelector("#seatTop .nm")?.textContent || "") + " " + (document.querySelector("#seatBot .nm")?.textContent || "")),
+  // na konci má „Odveta“ jen poražený (vítěz čeká), proto se měří „Jiná hra“, kterou mají oba
+  selektory: { start: ["#board", "#seatTop", "#seatBot", "#status"], hra: ["#board", "#seatTop", "#seatBot", "#status"], konec: ["#endOther"] },
+  // skutečné posouvání: stránka se do rámu nevejde, když ji jde odrolovat (pouhé scrollHeight > výška může být nepřístupný přesah)
+  async fit(P, faze) {
+    const o = await fitFrame(P, this.selektory[faze] || []);
+    const sy = await P.f.evaluate(() => { scrollTo(0, 99999); const y = scrollY; scrollTo(0, 0); return Math.round(y); });
+    return { ok: o.ok && sy === 0 && o.info.sw <= o.info.iw + 1, info: { ...o.info, odrolovat: sy } };
+  },
+  fitNazev: "hra se vejde do rámu (bez posunu, deska, jména i stav nad spodní hranou iframe)",
+  ovladani(faze) { return faze === "konec" ? ["#endOther"] : []; },
+  async partie(A, B) {
+    const r = /&r=([0-9a-z]+)&/.exec(await src(A.page))[1];
+    const d = await (await fetch(`https://mantledb.sh/v2/zviratka-${r}/hra`, { cache: "no-store" })).json();
+    check("dokument hry: Mark = x, Radka = o (jména z Herny)", d.g.x === "Mark" && d.g.o === "Radka", [d.g.x, d.g.o]);
+    const S = await sgEngine();
+    const line = sgLine(S, S.vrOf(d.g.vr), d.g.s, "o");
+    const [first, second] = d.g.s === "x" ? [A, B] : [B, A];
+    console.log(`  (začíná ${d.g.s === "x" ? "Mark" : "Radka"}, varianta ${S.vrOf(d.g.vr)}, ${line.length} tahů)`);
+    for (const [k, m] of line.entries()) {
+      const [P, O] = k % 2 === 0 ? [first, second] : [second, first];
+      await sgTah(P, O, m, k === line.length - 1);
+      if (k === 1) {
+        for (const Q of [A, B]) await Q.page.screenshot({ path: `${SHOTS}/mistnost-zviratka-sogi-hra-${Q.nazev}.png` });
+        await vejdeSe(A, "desktop (partie běží)", "hra");
+        await vejdeSe(B, "iPhone (partie běží)", "hra");
+      }
+    }
+    for (const P of [A, B]) await P.f.waitForSelector("#endBox:not([hidden])", { timeout: 15000 });
+    check("partie skončila u obou", true);
+    return 1;
+  },
+  primarni: (P) => P.f.locator("#endPrimary"),
+  sekundarni: (P) => P.f.locator("#endOther"),
+};
+SOGI.fit = SOGI.fit.bind(SOGI);
+SOGI.ovladani = SOGI.ovladani.bind(SOGI);
+
+// ───────────────────────── Kvízové lodě (kvizove-lode) ─────────────────────────
+// Námořní bitva s kvízem. Bez háčku na window; hraje se přes DOM pomocníky z repa hry (tests/lib.cjs: drive, fits, správné odpovědi ze zdrojů otázek),
+// jen se čte, nic se tam nezapisuje (jiné umístění repa: proměnná KL_REPO). Mark zná flotilu soupeře (z jeho localStorage), odpovídá správně
+// a střílí na jistotu → vyhraje (sedadlo 0); Radka střílí náhodně a odpovídá ze 2/3 špatně. Rozmístění: „Náhodně“ + „Hotovo“,
+// první kategorii vybere ten, kdo nezačíná (fáze cat0).
+const KL_REPO = process.env.KL_REPO || path.join(__dirname, "..", "..", "kvizove-lode");
+let klLib = null;
+const kl = () => klLib || (klLib = require(path.join(KL_REPO, "tests", "lib.cjs")));
+const klFaze = (P) => P.f.evaluate(() => { const b = document.getElementById("board"); return b && !document.getElementById("game").hidden ? b.dataset.phase : ""; }).catch(() => "");
+const KVIZ = {
+  id: "kvizove-lode",
+  nazev: "Nafukovací flotila", // název karty v Herně (hra sama se jmenuje Kvízové lodě)
+  vitez: 0,
+  skryteIds: ["copyTopBtn", "newGameBtn", "soloBtn", "setup", "intro", "share", "copyLinkBtn"],
+  async pripravena(P) { await P.f.waitForSelector('#board[data-phase="place"]', { timeout: 40000 }); },
+  async sedadla(A, B) {
+    const w = async (P) => P.f.evaluate(() => document.getElementById("board").dataset.me);
+    const [a, b] = [await w(A), await w(B)];
+    check("Mark = x (sedadlo 0, zakladatel), Radka = o; obě ve fázi rozmístění", a === "x" && b === "o", [a, b]);
+  },
+  async bezUi(P) { return !(await P.f.locator("#setup").isVisible()) && !(await P.f.locator("#intro").isVisible()) && !(await P.f.locator("#share").isVisible()) && !(await P.f.locator("#soloBtn").isVisible()); },
+  jmena: (P) => P.f.locator("#people").innerText(),
+  selektory: { start: ["#randomBtn", "#doneBtn"], hra: [], konec: ["#rematchBtn", "#jinaHraBtn"] },
+  // lib.fits: bez posouvání stránky, bazény, panel, karta otázky a ovladače celé v okně, text ≥ 14 px
+  async fit(P, faze) {
+    const bad = await kl().fits(P.f, P.nazev);
+    const o = await fitFrame(P, this.selektory[faze] || []);
+    return { ok: bad.length === 0 && o.ok, info: bad.length ? bad : o.info };
+  },
+  fitNazev: "hra se vejde do rámu (bez posunu, bazény, panel a ovládání v okně, text ≥ 14 px)",
+  ovladani(faze) { return faze === "konec" ? ["#rematchBtn", "#jinaHraBtn"] : []; },
+  async partie(A, B) {
+    const { drive } = kl();
+    for (const P of [A, B]) { await P.f.waitForSelector('#board[data-phase="place"]', { timeout: 20000 }); await P.f.click("#randomBtn"); await P.f.click("#doneBtn"); }
+    let vybrano = false;
+    for (let i = 0; i < 300 && !vybrano; i++) {
+      for (const P of [A, B]) if ((await klFaze(P)) === "cat0") { await P.f.locator("#panel .chip").first().click(); vybrano = true; break; }
+      if (!vybrano) await sleep(100);
+    }
+    check("po rozmístění si někdo vybral první kategorii", vybrano);
+    const cfg = (P, win) => ({ name: P.nazev, diff: win ? [3, 2, 3] : [1, 2], right: win ? () => true : (i) => i % 3 === 0, aim: win ? "perfect" : "random", radar: win ? 1 : 0, cats: ["sport", "veda", "zemepis"], timeout: 500000 });
+    const t0 = Date.now();
+    // jednou za partii změřit rozvržení na iPhonu uprostřed hry (otázka / střelba), ne jen začátek a konec
+    let zmereno = false;
+    const mereni = (async () => {
+      while (!zmereno && Date.now() - t0 < 500000) {
+        const ph = await klFaze(B);
+        if (/^(answer-me|shoot-me)$/.test(ph) && await B.f.locator("#qcard:not(.answered), #pwEnemy.aim").count().catch(() => 0)) {
+          zmereno = true; await sleep(600);
+          await B.page.screenshot({ path: `${SHOTS}/mistnost-kvizove-lode-hra-iphone.png` });
+          await vejdeSe(B, `iPhone (fáze ${ph})`, "hra");
+        }
+        await sleep(300);
+      }
+    })();
+    await Promise.all([drive(A.f, B.f, cfg(A, true)), drive(B.f, A.f, cfg(B, false))]);
+    zmereno = true; await mereni.catch(() => {});
+    await Promise.all([A, B].map((P) => P.f.waitForSelector("#endBox", { timeout: 20000 })));
+    await sleep(1200);
+    const nadpis = (P) => P.f.evaluate(() => document.getElementById("endTitle").textContent);
+    console.log(`  (partie ${(Date.now() - t0) / 1000 | 0} s, „${await nadpis(A)}“ / „${await nadpis(B)}“)`);
+    check("partie skončila u obou", true);
+    return 0;
+  },
+  primarni: (P) => P.f.locator("#rematchBtn"),
+  sekundarni: (P) => P.f.locator("#jinaHraBtn"),
+};
+KVIZ.fit = KVIZ.fit.bind(KVIZ);
+KVIZ.ovladani = KVIZ.ovladani.bind(KVIZ);
+
+// ───────────────────────── Čtyřka s otočkou (ctyrka-s-otockou) ─────────────────────────
+// Hra vystavuje window.__c4 (g = {cfg, m, n}, me, view, animating, busy). Tahy volí živý src/engine.js hry (ESM, stáhne se a načte přes data: URL;
+// stejné funkce replay/step jako ve hře): Mark (x, sedadlo 0) skládá čtyřku, Radka (o) se vyhýbá výhře i darování. Tah = najetí a klik do sloupce
+// (desktop myší, iPhone dvěma tapy). Vítěz = sedadlo 0.
+let c4Engine = null;
+async function c4Eng() {
+  if (c4Engine) return c4Engine;
+  const t = await (await fetch(ZIVA.replace(/herna\/$/, "") + "ctyrka-s-otockou/src/engine.js", { cache: "no-store" })).text();
+  if (/^\s*import\s/m.test(t)) throw new Error("engine.js hry už má importy, test ho neumí načíst samostatně");
+  return (c4Engine = await import("data:text/javascript;base64," + Buffer.from(t).toString("base64")));
+}
+const c4St = (P) => P.f.evaluate(() => ({ g: __c4.g, me: __c4.me, anim: __c4.animating, busy: __c4.busy, view: __c4.view }));
+function c4Vyber(E, s, me, winner) {
+  const cols = [...Array(s.w).keys()].filter((c) => E.step(s, String(c)));
+  const winsFor = (who) => cols.filter((c) => E.step({ ...s, turn: who }, String(c))?.st.over?.who === who);
+  if (me === winner) { const w = winsFor(me); return w.length ? w[0] : cols[0]; }
+  const bad = new Set([...winsFor(me), ...winsFor(winner)]);
+  return [...cols].reverse().find((c) => !bad.has(c)) ?? cols[cols.length - 1];
+}
+async function c4Hod(E, P, col) {
+  const g = await P.f.$("#grid"), box = await g.boundingBox();
+  const w = E.replay((await c4St(P)).g.cfg, []).st.w;
+  const pos = { x: (col + .5) * box.width / w, y: box.height * .5 };
+  if (P.nazev === "iphone") { await g.tap({ position: pos }); await P.page.waitForTimeout(150); await g.tap({ position: pos }); }
+  else { await P.page.mouse.move(box.x + pos.x, box.y + pos.y); await P.page.waitForTimeout(80); await P.page.mouse.click(box.x + pos.x, box.y + pos.y); }
+}
+const CTYRKA = {
+  id: "ctyrka-s-otockou",
+  nazev: "Čtyřka s otočkou",
+  vitez: 0,
+  skryteIds: ["setup", "share", "intro", "soloBtn", "linkBtn", "newBtn", "fsBtn"],
+  async pripravena(P) { await P.f.waitForFunction(() => window.__c4 && __c4.view === "play" && __c4.me, null, { timeout: 40000 }); },
+  async sedadla(A, B) {
+    const [a, b] = [await c4St(A), await c4St(B)];
+    check("Mark = x (sedadlo 0), Radka = o (sedadlo 1), stejná partie (n, cfg)", a.me === "x" && b.me === "o" && a.g.n === b.g.n && JSON.stringify(a.g.cfg) === JSON.stringify(b.g.cfg), [a.me, b.me, a.g.n, b.g.n]);
+  },
+  async bezUi(P) { return (await c4St(P)).view === "play" && !(await P.f.evaluate(() => ["setup", "share", "intro"].some((id) => document.getElementById(id).checkVisibility()))); },
+  jmena: (P) => P.f.evaluate(() => document.getElementById("nmX").textContent + " " + document.getElementById("nmO").textContent),
+  selektory: { start: ["#grid", "#rotL", "#rotR"], hra: ["#grid", "#rotL", "#rotR"], konec: ["#againBtn", "#otherBtn"] },
+  async fit(P, faze) { return fitFrame(P, this.selektory[faze] || []); },
+  fitNazev: "hra se vejde do rámu (bez posunu, deska a tlačítka otočky / konce celé nad spodní hranou iframe)",
+  ovladani(faze) { return faze === "konec" ? ["#againBtn", "#otherBtn"] : []; },
+  async partie(A, B) {
+    const E = await c4Eng();
+    let tahy = 0;
+    for (let i = 0; i < 80; i++) {
+      const s = await c4St(A);
+      if (s.anim || s.busy) { await sleep(300); continue; }
+      const r = E.replay(s.g.cfg, s.g.m).st;
+      if (r.over) break;
+      const [P, O] = r.turn === "x" ? [A, B] : [B, A], pred = s.g.m.length;
+      await c4Hod(E, P, c4Vyber(E, r, r.turn, "x"));
+      const ok = await cekej(async () => { const a = await c4St(P), b = await c4St(O); return a.g.m.length === pred + 1 && b.g.m.length === pred + 1 && !a.anim && !b.anim && !a.busy && !b.busy; }, 20000);
+      if (!ok) throw new Error("tah nedošel druhému hráči");
+      if (++tahy === 3) {
+        for (const Q of [A, B]) await Q.page.screenshot({ path: `${SHOTS}/mistnost-ctyrka-s-otockou-hra-${Q.nazev}.png` });
+        await vejdeSe(A, "desktop (partie běží)", "hra");
+        await vejdeSe(B, "iPhone (partie běží)", "hra");
+      }
+    }
+    const hotovo = await cekej(async () => { const [a, b] = [await c4St(A), await c4St(B)]; return E.replay(a.g.cfg, a.g.m).st.over && E.replay(b.g.cfg, b.g.m).st.over && !a.anim && !b.anim && !a.busy && !b.busy; }, 20000);
+    check("partie skončila u obou", hotovo, { tahy });
+    for (const P of [A, B]) await P.f.waitForSelector("#againBtn", { timeout: 20000 }).catch(() => {}); // karta konce přijde po dopřehrání animace
+    console.log(`  (partie: ${tahy} tahů, vítěz = Mark)`);
+    return 0;
+  },
+  primarni: (P) => P.f.locator("#againBtn"),
+  sekundarni: (P) => P.f.locator("#otherBtn"),
+};
+CTYRKA.fit = CTYRKA.fit.bind(CTYRKA);
+CTYRKA.ovladani = CTYRKA.ovladani.bind(CTYRKA);
+
 // ───────────────────────── společné ─────────────────────────
 let H = null;
 // Stránka ve hře se nesmí posouvat a vybrané prvky musí být celé v rámu.
@@ -883,7 +1105,7 @@ async function scenar(hra, URL_) {
 }
 
 (async () => {
-  const HRY = { psanicko: PSANICKO, caranice: CARANICE, "jezci-prak": JEZKOMET, jezkomet: JEZKOMET, mlask: MLASK, "ovocny-souboj": OVOCNY, kaficka: KAFICKA, tancicky: TANCICKY, "jamka-na-miru": JAMKA };
+  const HRY = { psanicko: PSANICKO, caranice: CARANICE, "jezci-prak": JEZKOMET, jezkomet: JEZKOMET, mlask: MLASK, "ovocny-souboj": OVOCNY, kaficka: KAFICKA, tancicky: TANCICKY, "jamka-na-miru": JAMKA, "zviratka-sogi": SOGI, "kvizove-lode": KVIZ, "ctyrka-s-otockou": CTYRKA };
   let URL_ = ZIVA;
   const ids = [];
   for (const arg of process.argv.slice(2)) {
@@ -891,7 +1113,7 @@ async function scenar(hra, URL_) {
     else if (HRY[arg]) ids.push(arg);
     else { console.error(`Neznámý argument „${arg}“. Hry: ${Object.keys(HRY).join(", ")}, nebo URL Herny.`); process.exit(2); }
   }
-  if (!ids.length) ids.push("psanicko", "caranice", "jezci-prak", "mlask", "ovocny-souboj", "kaficka", "tancicky", "jamka-na-miru");
+  if (!ids.length) ids.push("psanicko", "caranice", "jezci-prak", "mlask", "ovocny-souboj", "kaficka", "tancicky", "jamka-na-miru", "zviratka-sogi", "kvizove-lode", "ctyrka-s-otockou");
   for (const id of ids) await scenar(HRY[id], URL_);
   console.log(`\nVÝSLEDEK: ${ok} PASS, ${fail} FAIL`);
   process.exit(fail ? 1 : 0);
