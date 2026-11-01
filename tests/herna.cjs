@@ -160,7 +160,8 @@ async function bezSite(browser) {
   const man = await req.get(new URL("manifest.webmanifest", URL_).href);
   check("manifest 200", man.status() === 200, man.status());
   const m = JSON.parse(await man.text());
-  check("manifest: standalone, start_url, ikony 192 a 512", m.display === "standalone" && m.start_url && ["192x192", "512x512"].every((s) => m.icons.some((i) => i.sizes === s)), m);
+  // bez start_url: na plochu se uloží právě otevřená adresa (i místnost #m=…)
+  check("manifest: standalone, bez start_url, ikony 192 a 512", m.display === "standalone" && !("start_url" in m) &&["192x192", "512x512"].every((s) => m.icons.some((i) => i.sizes === s)), m);
   for (const f of ["apple-touch-icon.png", "icon-192.png", "icon-512.png", "games.json"]) {
     const r = await req.get(new URL(f, URL_).href);
     check(`${f} 200`, r.status() === 200, r.status());

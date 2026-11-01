@@ -274,12 +274,15 @@
     document.querySelector(".skore").setAttribute("aria-label", stav.n[0] + " " + stav.sk[0] + ", " + stav.n[1] + " " + stav.sk[1]);
     var st = $("mist-stav"), poz = $("mist-pozvat");
     if (!stav.s1) { st.textContent = seat === 0 ? "Odkaz zatím nikdo neotevřel." : "Místnost čeká na druhého hráče."; poz.hidden = seat !== 0; }
+    else if (seat !== null && stav.log.length) { st.innerHTML = popisSouboje(); poz.hidden = true; }
     else { st.textContent = seat === null ? "V místnosti sedí oba." : "Hrajete spolu. Hru vybírá kdokoli z vás."; poz.hidden = true; }
     vykresliRamSkore();
+    if ($("ram").hidden) postavPohar();
 
-    // Teď hrajete
+    // Teď hrajete (po dohrané partii ne: tu hru najdeš mezi dlaždicemi Další hra)
     var ted = $("ted"), hra = stav.hra && H.hra(stav.hra.id);
-    if (hra && seat !== null) {
+    var dohrano = hra && fazeK === stav.hra.k && faze === "konec";
+    if (hra && seat !== null && !dohrano) {
       ted.style.setProperty("--c", hra.barva);
       ted.innerHTML = '<span class="ted-ikona" aria-hidden="true"><svg><use href="#i-' + esc(hra.ikona) + '"/></svg></span>' +
         '<div><p class="ted-stitek">Teď hrajete</p><p class="ted-nazev">' + esc(hra.nazev) + '</p></div>' +
@@ -287,6 +290,7 @@
       ted.hidden = false;
     } else ted.hidden = true;
     oznacKarty();
+    vykresliDalsi();
 
     // Poslední partie
     var hist = $("historie");
@@ -298,10 +302,61 @@
       hist.hidden = false;
     } else hist.hidden = true;
   }
+  // ---------- souboj místnosti: kdo vede, série, putovní pohár ----------
+  // Série = kolik posledních partií v řadě vyhrál týž hráč (remíza ji končí).
+  function serie(log) {
+    if (!log.length || log[0].w < 0) return { s: -1, n: 0 };
+    var n = 0;
+    while (n < log.length && log[n].w === log[0].w) n++;
+    return { s: log[0].w, n: n };
+  }
+  function vede() { return stav.sk[0] > stav.sk[1] ? 0 : stav.sk[1] > stav.sk[0] ? 1 : -1; }
+  function popisSouboje() {
+    var v = vede(), o = Math.abs(stav.sk[0] - stav.sk[1]), ser = serie(stav.log);
+    var t = v < 0 ? "Vyrovnáno, další partie rozhodne."
+      : esc(stav.n[v]) + (o >= 5 ? " ujíždí o " : o >= 3 ? " utíká o " : " vede o ") + o + (ser.n && ser.s === 1 - v ? ", " + esc(stav.n[1 - v]) + " dotahuje." : ".");
+    if (ser.n >= 2) {
+      t += ' <span class="serie' + (ser.n >= 3 ? " serie-hot" : "") + '"><svg aria-hidden="true"><use href="#i-serie"/></svg>' +
+        esc(stav.n[ser.s]) + " · " + (ser.n === 3 ? "hattrick" : ser.n + "× v řadě") + "</span>";
+    }
+    return t;
+  }
+  // Pohár nad číslem vedoucího; při remíze uprostřed nakřivo, před první partií schovaný.
+  function postavPohar() {
+    var p = $("pohar");
+    if (!stav || !stav.log.length) { p.classList.remove("je-videt"); return; }
+    var v = vede(), c = p.parentNode.getBoundingClientRect();
+    var px = 0;
+    if (v >= 0) { var b = $("sk-" + v).getBoundingClientRect(); px = Math.round(b.left + b.width / 2 - (c.left + c.width / 2)); }
+    p.style.setProperty("--px", px + "px");
+    p.style.setProperty("--rot", v < 0 ? "-14deg" : "0deg");
+    p.classList.add("je-videt");
+  }
+  window.addEventListener("resize", function () { if (stav && $("ram").hidden) postavPohar(); });
+
+  var ramSk = null;
   function vykresliRamSkore() {
     if (!stav) return;
-    $("ram-skore").innerHTML = '<span class="rs-jm">' + esc(stav.n[0]) + '</span><b>' + stav.sk[0] + '</b><i>:</i><b>' + stav.sk[1] + '</b><span class="rs-jm">' + esc(stav.n[1]) + "</span>";
-    $("ram-skore").setAttribute("aria-label", "Skóre: " + stav.n[0] + " " + stav.sk[0] + ", " + stav.n[1] + " " + stav.sk[1]);
+    var v = vede(), sk = stav.sk, pohar = '<svg aria-hidden="true"><use href="#i-pohar"/></svg>';
+    var cislo = function (s) { return "<b" + (ramSk && ramSk.m === mid && sk[s] > ramSk.sk[s] ? ' class="bod"' : "") + ">" + sk[s] + "</b>"; };
+    $("ram-skore").innerHTML = (v === 0 ? pohar : "") + '<span class="rs-jm">' + esc(stav.n[0]) + "</span>" + cislo(0) + "<i>:</i>" + cislo(1) +
+      '<span class="rs-jm">' + esc(stav.n[1]) + "</span>" + (v === 1 ? pohar : "");
+    $("ram-skore").setAttribute("aria-label", "Skóre: " + stav.n[0] + " " + sk[0] + ", " + stav.n[1] + " " + sk[1]);
+    ramSk = { m: mid, sk: sk.slice() };
+  }
+
+  // Další hra: dlaždice všech hratelných her, ťuk = volba (stejně jako karta).
+  function vykresliDalsi() {
+    var sek = $("dalsi");
+    if (!stav || seat === null) { sek.hidden = true; return; }
+    var cur = stav.hra ? stav.hra.id : null;
+    $("dalsi-nadpis").textContent = cur ? "Další hra" : "Vyberte hru";
+    $("dalsi-seznam").innerHTML = H.hratelne().map(function (h) {
+      return '<li><a class="dl-hra' + (h.id === cur ? " je-ted" : "") + '" href="' + esc(h.url) + '" data-id="' + esc(h.id) + '" style="--c:' + esc(h.barva) + '">' +
+        '<span class="dl-ikona" aria-hidden="true"><svg><use href="#i-' + esc(h.ikona) + '"/></svg></span>' +
+        '<span class="dl-nazev">' + esc(h.nazev) + "</span></a></li>";
+    }).join("");
+    sek.hidden = false;
   }
   function oznacKarty() {
     if (!mid) return;
@@ -479,6 +534,8 @@
     if (r.hidden) return;
     r.hidden = true;
     koren.classList.remove("ram-otevreny");
+    // Zpátky nahoru ke skóre a dlaždicím Další hra; pohár se k vedoucímu přesune až před očima.
+    window.scrollTo(0, 0);
     vykresliMistnost();
   }
   function zpetDoMistnosti() { skryjRam(); }
@@ -579,8 +636,10 @@
     skryjRam();
     zrusIframe();
     ram = { id: null, k: -1, protokol: null, h: "" };
-    $("ted").hidden = true; $("historie").hidden = true;
+    $("ted").hidden = true; $("historie").hidden = true; $("dalsi").hidden = true;
+    $("pohar").classList.remove("je-videt");
     oznacKarty();
+    $("plocha").textContent = "Na iPhonu dej Sdílet a Přidat na plochu. Herna se pak otevře přes celou obrazovku.";
     document.title = "Herna";
     vykresliPas();
   }
@@ -599,6 +658,8 @@
     $("pas").hidden = true;
     $("mist-stav").textContent = "Načítám místnost…";
     $("sk-j0").textContent = ""; $("sk-j1").textContent = "";
+    // Na plochu se uloží adresa místnosti (manifest nemá start_url), z ikony se otevře rovnou tahle místnost.
+    $("plocha").textContent = "Na iPhonu dej Sdílet a Přidat na plochu. Tahle místnost se pak otevře rovnou z ikony.";
     document.title = "Herna · místnost";
     nactiDoc(id).then(function (d) {
       if (mid !== id) return;

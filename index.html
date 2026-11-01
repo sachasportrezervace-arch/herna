@@ -115,6 +115,15 @@ h1,h2,p{margin:0}
 .sk-cisla{display:flex;align-items:center;gap:8px;font-size:50px;font-weight:800;line-height:1;font-variation-settings:"opsz" 96;font-variant-numeric:tabular-nums}
 .sk-cisla b{min-width:1ch;text-align:center;display:inline-block}
 .sk-cisla i{font-style:normal;color:var(--hot)}
+.sk-cisla{position:relative}
+/* Putovní pohár nad číslem toho, kdo vede; při remíze stojí uprostřed nakřivo. --px posouvá mistnost.js. */
+.pohar{position:absolute;left:50%;top:-25px;width:30px;height:30px;opacity:0;transform:translateX(calc(-50% + var(--px,0px))) rotate(var(--rot,0deg));transition:transform .7s cubic-bezier(.3,1.5,.5,1),opacity .3s}
+.pohar.je-videt{opacity:1}
+.serie{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 6px;border-radius:999px;background:var(--night2);color:var(--paper);font-weight:800;font-size:13.5px;white-space:nowrap}
+.serie svg{width:20px;height:20px}
+.serie-hot{background:var(--hot);color:var(--ink)}
+.serie-hot svg{animation:plamen 1.4s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes plamen{0%,100%{transform:rotate(-6deg) scaleY(1)}50%{transform:rotate(5deg) scaleY(1.12)}}
 .bod{animation:bod .8s ease-out}
 @keyframes bod{0%{transform:scale(1.6);color:var(--hot)}100%{transform:none}}
 .scena .mist-stav{max-width:none;margin-bottom:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:8px;font-size:14.5px;color:var(--mut);min-height:44px}
@@ -129,6 +138,20 @@ h1,h2,p{margin:0}
 .ted-ikona svg{width:38px;height:38px}
 .ted-stitek{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
 .ted-nazev{font-size:19px;font-weight:800;line-height:1.1;font-variation-settings:"opsz" 32}
+/* Další hra: všechny hry jako dlaždice, na iPhonu bez posouvání hned pod skóre */
+.dalsi{margin:14px 14px 0}
+.dalsi[hidden]{display:none}
+.dalsi h2{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:0 4px 6px}
+.dalsi ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:4px 4px}
+.dl-hra{display:flex;flex-direction:column;align-items:center;gap:5px;padding:5px 2px 6px;border-radius:16px;color:var(--paper);text-decoration:none;text-align:center;-webkit-tap-highlight-color:transparent;outline:none}
+.dl-hra:focus-visible{box-shadow:0 0 0 3px var(--hot)}
+.dl-ikona{width:54px;height:54px;border-radius:50%;background:var(--c);border:3px solid var(--ink);display:grid;place-items:center;transition:transform .14s}
+.dl-ikona svg{width:40px;height:40px}
+.dl-hra:active .dl-ikona{transform:scale(.9)}
+.dl-nazev{font-size:12.5px;font-weight:700;line-height:1.15;text-wrap:balance}
+.dl-hra.je-ted .dl-ikona{box-shadow:0 0 0 3px var(--night),0 0 0 6px var(--hot)}
+.dl-hra.je-ted .dl-nazev{color:var(--hot)}
+.v-mistnost .pata-uvod{display:none}
 .historie{padding:0 20px 20px}
 .historie[hidden]{display:none}
 .historie h2{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
@@ -151,7 +174,7 @@ h1,h2,p{margin:0}
 /* Hra v rámu přes celou obrazovku */
 .ram{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;background:var(--night)}
 .ram[hidden]{display:none}
-.ram-lista{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:calc(2px + env(safe-area-inset-top)) 12px 2px 2px;min-height:48px;background:var(--night);color:var(--paper);border-bottom:3px solid var(--hot)}
+.ram-lista{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:calc(2px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 2px calc(2px + env(safe-area-inset-left));min-height:48px;background:var(--night);color:var(--paper);border-bottom:3px solid var(--hot)}
 .ram-zpet{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 12px 0 8px;border:0;border-radius:999px;background:transparent;color:var(--paper);font:inherit;font-weight:800;font-size:15px;cursor:pointer}
 .ram-zpet svg{width:22px;height:22px}
 .ram-zpet:focus-visible{outline:3px solid var(--hot)}
@@ -160,7 +183,10 @@ h1,h2,p{margin:0}
 .ram-skore .rs-jm{overflow:hidden;text-overflow:ellipsis;max-width:8ch}
 .ram-skore b{font-size:18px;font-variant-numeric:tabular-nums;display:inline-block}
 .ram-skore i{font-style:normal;color:var(--hot)}
-.ram-telo{position:relative;flex:1 1 auto;min-height:0;margin-bottom:env(safe-area-inset-bottom)}
+.ram-skore svg{width:20px;height:20px;flex:none}
+.ram-skore b.bod{animation:bod .8s ease-out}
+/* iframe nikdy pod výřezem ani pod domácím proužkem: hra uvnitř rámu safe-area nevidí */
+.ram-telo{position:relative;flex:1 1 auto;min-height:0;margin:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 .ram-telo iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--night)}
 .ram-telo iframe[hidden]{display:none}
 .ram-ceka{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;padding:24px;text-align:center;background:var(--night);color:var(--paper)}
@@ -189,7 +215,21 @@ h1,h2,p{margin:0}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));z-index:40;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);padding:12px 18px;border-radius:16px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);font-weight:700;font-size:15px}
 .toast[hidden]{display:none}
 @media (max-width:429px){.ram-nazev{display:none}.ram-skore{margin-left:auto}.ram-skore .rs-jm{max-width:11ch}}
-@media (prefers-reduced-motion:reduce){.volba,.volba-ikona{transition:none}.bod,.tecky i{animation:none}}
+/* Telefon na šířku: lišta Herny je úzký sloupec vlevo, hra dostane celou výšku. */
+@media (orientation:landscape) and (max-height:500px){
+  .ram{flex-direction:row}
+  .ram-lista{flex-direction:column;justify-content:space-between;align-items:center;gap:6px;width:calc(66px + env(safe-area-inset-left));min-height:0;padding:calc(4px + env(safe-area-inset-top)) 3px calc(8px + env(safe-area-inset-bottom)) calc(3px + env(safe-area-inset-left));border-bottom:0;border-right:3px solid var(--hot)}
+  .ram-zpet{flex-direction:column;gap:0;min-height:52px;padding:2px 4px;font-size:11.5px}
+  .ram-nazev{display:none}
+  .ram-skore{flex-direction:column;gap:1px;margin:0;font-size:12px}
+  .ram-skore .rs-jm{max-width:60px}
+  .ram-skore i{line-height:.6}
+  .ram-telo{margin:0 env(safe-area-inset-right) env(safe-area-inset-bottom) 0}
+}
+/* Na šířku s výřezem: obsah místnosti a panely mimo výřez. */
+.stranka{padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+.panel-list{padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+@media (prefers-reduced-motion:reduce){.volba,.volba-ikona,.pohar,.dl-ikona{transition:none}.bod,.tecky i,.serie-hot svg,.ram-skore b.bod{animation:none}}
 @media (min-width:960px){
   .pas{margin:28px 40px 0;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ikona text akce";padding:16px 18px 16px 18px;gap:18px}
   .pas-ikona{width:68px;height:68px}.pas-ikona svg{width:52px;height:52px}
@@ -206,6 +246,13 @@ h1,h2,p{margin:0}
   .ted{margin:28px 40px 0;padding:12px 14px 12px 16px}
   .ted-ikona{width:60px;height:60px}.ted-ikona svg{width:46px;height:46px}
   .ted-nazev{font-size:23px}
+  .pohar{top:-40px;width:46px;height:46px}
+  .serie{font-size:15px;padding:4px 12px 4px 7px}.serie svg{width:22px;height:22px}
+  .dalsi{margin:28px 40px 0}
+  .dalsi ul{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+  .dl-ikona{width:66px;height:66px}.dl-ikona svg{width:50px;height:50px}
+  .dl-nazev{font-size:14px}
+  .dl-hra:hover .dl-ikona{transform:translateY(-3px)}
   .historie{padding:0 40px 32px;max-width:720px}
   .ram-nazev{font-size:16px}
   .ram-skore .rs-jm{max-width:18ch}
@@ -249,7 +296,7 @@ h1,h2,p{margin:0}
       <a class="mist-domu" href="./">Herna</a>
       <div class="skore" aria-live="polite">
         <span class="sk-jm" id="sk-j0"></span>
-        <span class="sk-cisla"><b id="sk-0">0</b><i aria-hidden="true">:</i><b id="sk-1">0</b></span>
+        <span class="sk-cisla"><svg class="pohar" id="pohar" aria-hidden="true"><use href="#i-pohar"/></svg><b id="sk-0">0</b><i aria-hidden="true">:</i><b id="sk-1">0</b></span>
         <span class="sk-jm" id="sk-j1"></span>
       </div>
       <p class="mist-stav"><span id="mist-stav">Načítám místnost…</span> <button class="mist-pozvat" id="mist-pozvat" type="button" hidden><svg aria-hidden="true"><use href="#i-odkaz"/></svg>Poslat odkaz</button></p>
@@ -259,11 +306,12 @@ h1,h2,p{margin:0}
   <main>
     <section id="pas" class="pas" hidden></section>
     <div id="ted" class="ted" hidden></div>
+    <section id="dalsi" class="dalsi" hidden aria-labelledby="dalsi-nadpis"><h2 id="dalsi-nadpis">Další hra</h2><ul id="dalsi-seznam"></ul></section>
     <ul id="hry" class="hry"></ul>
     <section id="historie" class="historie" hidden><h2>Poslední partie</h2><ol id="historie-seznam"></ol></section>
   </main>
   <footer class="pata">
-    <p>Hra se zakládá až uvnitř. Odkaz s výzvou pak pošleš do chatu.</p>
+    <p class="pata-uvod">Hra se zakládá až uvnitř. Odkaz s výzvou pak pošleš do chatu.</p>
     <p id="plocha" class="pata-plocha" hidden>Na iPhonu dej Sdílet a Přidat na plochu. Herna se pak otevře přes celou obrazovku.</p>
   </footer>
 </div>

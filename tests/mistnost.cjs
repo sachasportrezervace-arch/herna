@@ -172,10 +172,20 @@ async function rozvrzeni(page, nazev) {
   await hra(b).locator("#m-prijmout").click();
   check("stará hra běží u obou", await cekej(async () => (await hra(a).locator("#m-stav").textContent()) === "Partie běží" && (await hra(b).locator("#m-stav").textContent()) === "Partie běží"));
 
-  console.log("\nRadka přepne zpátky (druhý směr)");
+  console.log("\nRadka přepne zpátky (druhý směr) přes dlaždice Další hra");
+  await b.evaluate(() => scrollTo(0, 400)); // pod rámem odscrollovaná místnost: návrat musí skočit nahoru
   await b.click("#ram-zpet");
-  await b.waitForTimeout(300);
-  await b.click('.hra[data-id="maketa"] .hra-odkaz');
+  await b.waitForTimeout(900); // pohár dojede
+  const souboj = await b.evaluate(() => {
+    const p = document.getElementById("pohar"), pb = p.getBoundingClientRect(), s1 = document.getElementById("sk-1").getBoundingClientRect();
+    const dl = [...document.querySelectorAll("#dalsi .dl-hra")];
+    return { stav: document.getElementById("mist-stav").textContent, pohar: p.classList.contains("je-videt"), posun: Math.round(pb.left + pb.width / 2 - (s1.left + s1.width / 2)),
+      y: scrollY, dlazdic: dl.length, prvniRadaDole: Math.round(Math.max(...dl.slice(0, 4).map((a) => a.getBoundingClientRect().bottom))), vh: innerHeight };
+  });
+  check("místnost: „Radka vede o 1.“ a pohár nad Radčiným číslem", /^Radka vede o 1\.$/.test(souboj.stav) && souboj.pohar && Math.abs(souboj.posun) <= 6, souboj);
+  check("návrat z hry: místnost nahoře, Další hra s dlaždicí každé hratelné hry, první řada v okně iPhonu", souboj.y === 0 && souboj.dlazdic >= 13 && souboj.prvniRadaDole <= souboj.vh, souboj);
+  await b.screenshot({ path: `${SHOTS}/mistnost-dalsi-iphone.png` });
+  await b.click('#dalsi .dl-hra[data-id="maketa"]');
   await b.waitForSelector('#dlg:not([hidden]) [data-akce="prepnout"]');
   check("Radka: dotaz na přepnutí rozehrané staré hry", /Přepnout na Maketa\?/.test(await b.textContent("#dlg .dlg-nadpis")));
   await b.waitForTimeout(450); // snímek až po dojetí animace
@@ -187,6 +197,21 @@ async function rozvrzeni(page, nazev) {
   await a.screenshot({ path: `${SHOTS}/mistnost-volba-desktop.png` });
   check("Markovi se hra přepne sama (zaklada=0)", await cekej(async () => /k3&seat=0&names=Mark,Radka&zaklada=0$/.test(await src(a))), await src(a));
   check("oba v nové partii", await cekej(async () => (await hra(a).locator("#m-stav").textContent()) === "Partie běží" && (await hra(b).locator("#m-stav").textContent()) === "Partie běží"));
+  // iPhone otočený na šířku: lišta je sloupec vlevo, hra má celou výšku; po otočení zpět zase lišta nahoře.
+  const ramRozmer = () => b.evaluate(() => {
+    const l = document.querySelector(".ram-lista").getBoundingClientRect(), f = document.querySelector("#ram-telo iframe").getBoundingClientRect();
+    return { lista: [Math.round(l.width), Math.round(l.height)], ram: [Math.round(f.left), Math.round(f.top), Math.round(f.width), Math.round(f.height)], vw: innerWidth, vh: innerHeight };
+  });
+  await b.setViewportSize({ width: 844, height: 390 });
+  await b.waitForTimeout(500);
+  const sirka = await ramRozmer();
+  check("iPhone na šířku: lišta vlevo (≤ 80 px), hra celá výška vedle ní", sirka.lista[0] <= 80 && sirka.ram[0] >= sirka.lista[0] - 1 && sirka.ram[1] === 0 && sirka.ram[3] === sirka.vh && sirka.ram[0] + sirka.ram[2] <= sirka.vw, sirka);
+  await b.screenshot({ path: `${SHOTS}/mistnost-hra-iphone-sirka.png` });
+  await b.setViewportSize({ width: 390, height: 664 });
+  await b.waitForTimeout(500);
+  const vyska = await ramRozmer();
+  check("iPhone zpět na výšku: lišta nahoře, rám 390 široký pod ní", vyska.ram[0] === 0 && vyska.ram[2] === 390 && vyska.ram[1] >= vyska.lista[1] - 1, vyska);
+  check("hra po otočení dál běží", (await hra(b).locator("#m-stav").textContent()) === "Partie běží");
   await hra(a).locator("#m-vyhrat").click();
   check("skóre 1 : 1 u obou", await cekej(async () => (await a.textContent("#ram-skore")).replace(/\s/g, "") === "Mark1:1Radka" && (await b.textContent("#ram-skore")).replace(/\s/g, "") === "Mark1:1Radka"));
 
@@ -200,6 +225,10 @@ async function rozvrzeni(page, nazev) {
   await a.waitForTimeout(1200);
   check("po obnovení: bez dialogu, Mark na svém místě, skóre 1 : 1", (await a.$eval("#dlg", (e) => e.hidden)) && await a.$eval("#sk-j0", (e) => e.classList.contains("je-ja")) && (await a.textContent("#sk-0")) === "1" && (await a.textContent("#sk-1")) === "1");
   check("poslední partie: 2 řádky", (await a.$$("#historie-seznam li")).length === 2);
+  const rem = await a.evaluate(() => ({ stav: document.getElementById("mist-stav").textContent, pohar: document.getElementById("pohar").classList.contains("je-videt"), rot: document.getElementById("pohar").style.getPropertyValue("--rot") }));
+  check("remíza 1 : 1: „Vyrovnáno“, pohár uprostřed nakřivo", /^Vyrovnáno/.test(rem.stav) && rem.pohar && rem.rot === "-14deg", rem);
+  const man = await (await fetch(new URL("manifest.webmanifest", URL_))).json();
+  check("manifest bez start_url (z plochy se otevře uložená místnost)", !("start_url" in man), man.start_url);
   await a.screenshot({ path: `${SHOTS}/mistnost-skore-desktop.png` });
   await a.goto(URL_, { waitUntil: "networkidle" });
   await a.waitForSelector("#pas:not([hidden])");

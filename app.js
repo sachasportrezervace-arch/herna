@@ -135,6 +135,7 @@
   window.Herna = {
     esc: esc,
     hra: function (id) { return hry.filter(function (h) { return h.id === id; })[0] || null; },
+    hratelne: function () { return hry.filter(function (h) { return h.stav === "hraj"; }); },
     nacteno: function () { return hry.length > 0; },
     poNacteni: function (f) { if (hry.length) f(); poNacteni.push(f); },
     poVykresleni: function (f) { poVykresleni.push(f); },

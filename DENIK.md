@@ -1,5 +1,6 @@
 # Deník – Herna
 
+PŘEVZATO 1. 11. – kolo vylepšení, session herna-kolo (rozcestník); jiná session sem nepíše.
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
 ## 2026-11-01 – Jamka na míru hratelná v Herně

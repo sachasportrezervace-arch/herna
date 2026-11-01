@@ -91,7 +91,18 @@
       '<path d="M48 10 L58 17 L61 12.5 Q62 9 58 6.5 L55 4.5 Q52 3 50 6 Z" fill="#f28aa0" ' + S + '/>' +
       '<path d="M24 44 L34 51 L22 56 Z" fill="#f6dcb6" ' + S + '/>',
     // šipka do hry
-    sipka: '<path d="M16 32 H46 M34 20 L46 32 L34 44" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>',
+    // putovní pohár: drží ho, kdo v místnosti vede
+    pohar:
+      '<path d="M21 16 H12 a8 8 0 0 0 10 12 M43 16 H52 a8 8 0 0 1 -10 12" fill="none" ' + S + '/>' +
+      '<path d="M19 9 H45 V24 a13 13 0 0 1 -26 0 Z" fill="#ffcc3d" ' + S + '/>' +
+      '<path d="M27 15 V25" stroke="#fff8ee" stroke-width="3.6" stroke-linecap="round"/>' +
+      '<path d="M28.5 37 H35.5 L37 45 H27 Z" fill="#ffcc3d" ' + S + '/>' +
+      '<rect x="19" y="45" width="26" height="9" rx="2.5" fill="#e8473c" ' + S + '/>',
+    // série výher v řadě
+    serie:
+      '<path d="M33 7 C37 18 50 24 49 39 A17 17 0 0 1 15 39 C15 31 20 26 23 21 C25 27 28 29 29 29 C28 21 29 14 33 7 Z" fill="#ff8a3d" ' + S + '/>' +
+      '<path d="M32 31 C36 37 41 39 41 45 A9 9 0 0 1 23 45 C23 40 28 37 32 31 Z" fill="#ffcc3d"/>',
+    sipka:'<path d="M16 32 H46 M34 20 L46 32 L34 44" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>',
     // zpět do místnosti
     zpet: '<path d="M48 32 H18 M30 20 L18 32 L30 44" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>',
     // odkaz (dva články řetězu)
