@@ -1,5 +1,5 @@
 // Skutečná hra v živé místnosti Herny: node tests/mistnost-hry.cjs [psanicko|caranice ...] [URL Herny]
-// Bez názvu hry se spustí všechny hry postupně (psanicko, caranice, jezci-prak, mlask, ovocny-souboj, kaficka, tancicky). Výchozí URL je živá Herna.
+// Bez názvu hry se spustí všechny hry postupně (psanicko, caranice, jezci-prak, mlask, ovocny-souboj, kaficka, tancicky, jamka-na-miru). Výchozí URL je živá Herna.
 // Playwright z globální instalace (NODE_PATH = npm root -g). Mark v Chromiu 1440×900, Radka ve WebKitu iPhone 13.
 // Žádné makety a žádné přepisy games.json: je to ostrá Herna, ostrá hra i ostrý mantledb.
 // Ověří: založení, vstup Radky, výběr hry, automatické přepnutí Radce (herna=1, seat, zaklada, stejné r), žádná výzva ani setup,
@@ -633,6 +633,103 @@ const TANCICKY = {
 TANCICKY.fit = TANCICKY.fit.bind(TANCICKY);
 TANCICKY.ovladani = TANCICKY.ovladani.bind(TANCICKY);
 
+// ───────────────────────── Jamka na míru (jamka-na-miru) ─────────────────────────
+// Tahový minigolf, 6 jamek, před každou jamkou se staví past soupeři. Hra vystavuje window.__jm (state, viewInfo, autoTrap, bot, shoot, scene.skip).
+// Partie = celých 6 jamek (~3 minuty): Mark (sedadlo 0 = x) i Radka (o) hrají skriptem (autoTrap + bot). Vítěz = méně ran (x je sedadlo 0), shoda = remíza.
+// Na iPhonu 13 (iframe 390×613) se při hře měří past (výběr všech karet), výsledek jamky a úder; karta konce a Odveta měří obecná část testu.
+const jmSt = (P) => P.f.evaluate(() => window.__jm && window.__jm.state()).catch(() => null);
+const JM_SELS = ["#topbar .chip", "#holePill", "#bMenu", "#dock", "#dock button", "#dock .say", "#bCam", "#view .panel", "#view button", ".endcard h2", ".endcard .score", ".endcard .cardwrap", ".endcard .titles", ".endcard .wait", ".endcard .trn-note"];
+const jmSoucet = (a) => a.reduce((s, v) => s + v, 0);
+// jeden krok hráče: přeskočí animace, postaví past, nebo vystřelí; vrací stav před krokem
+async function jmKrok(P) {
+  const s = await jmSt(P);
+  if (!s || s.ph === "end") return s;
+  if (s.busy || s.result) { await P.f.evaluate(() => window.__jm.scene.skip()).catch(() => {}); return s; }
+  if (s.ph === "trap" && s.me && !s.pend[s.me]) await P.f.evaluate(() => window.__jm.autoTrap()).catch(() => {});
+  else if (s.ph === "play" && s.p === s.me) await P.f.evaluate(() => { const b = window.__jm.bot(); window.__jm.shoot(b.A, b.P); }).catch(() => {});
+  return s;
+}
+const JAMKA = {
+  id: "jamka-na-miru",
+  nazev: "Jamka na míru",
+  async kontext(ctx) {
+    await ctx.addInitScript(() => { try { localStorage.setItem("jm-ioshint", "1"); } catch {} }); // nápověda „přidat na plochu“ na iOS by zakrývala hru
+  },
+  async pripravena(P) {
+    P.jmFit = new Set();
+    await P.f.waitForFunction(() => window.__jm && window.__jm.state() && !window.__jm.viewInfo().view, null, { timeout: 40000 });
+  },
+  async sedadla(A, B) {
+    const [a, b] = [await jmSt(A), await jmSt(B)];
+    check("Mark (sedadlo 0) hraje za x, Radka za o, obě ve fázi pasti", !!a && !!b && a.me === "x" && b.me === "o" && a.ph === "trap" && b.ph === "trap", [a && [a.me, a.ph], b && [b.me, b.ph]]);
+  },
+  async bezUi(P) {
+    const v = await P.f.evaluate(() => ({ view: window.__jm.viewInfo().view, vid: ["bCreate", "bSolo", "bShare", "bShare2", "bCopy"].filter((id) => { const e = document.getElementById(id); return e && e.checkVisibility(); }) }));
+    return !v.view && v.vid.length === 0;
+  },
+  skryteIds: ["bCreate", "bSolo", "bShare", "bShare2", "bCopy"],
+  jmena: (P) => P.f.evaluate(() => document.querySelector("#chipX .nm").textContent + " " + document.querySelector("#chipO .nm").textContent),
+  selektory: { start: ["#dock .tc"], past: ["#dock .tc"], uder: ["#dock"], vysledek: [], konec: ["#bAgain", "#bOther"] },
+  // celá hra se musí vejít do rámu: žádný z měřených prvků nesmí přečnívat, #view ani stránka se nesmí posouvat
+  async fit(P, faze) {
+    const r = await P.f.evaluate(({ sels, ovl }) => {
+      const W = innerWidth, H = innerHeight, d = document.documentElement, v = document.getElementById("view"), kde = {};
+      for (const sel of sels) for (const el of document.querySelectorAll(sel)) {
+        const b = el.getBoundingClientRect(); if (!b.width || !b.height || getComputedStyle(el).visibility === "hidden") continue;
+        if (b.top < -1 || b.bottom > H + 1 || b.left < -1 || b.right > W + 1) kde[sel] = [Math.round(b.left), Math.round(b.top), Math.round(b.right), Math.round(b.bottom)];
+      }
+      for (const sel of ovl) { const e = document.querySelector(sel); if (!e || !e.checkVisibility()) kde[sel] = "chybí"; }
+      if (!v.hidden && v.scrollHeight > v.clientHeight + 1) kde["#view scrolluje"] = [v.scrollHeight, v.clientHeight];
+      return { ok: Object.keys(kde).length === 0 && d.scrollHeight <= H + 1 && d.scrollWidth <= W + 1, o: { sh: d.scrollHeight, ih: H, sw: d.scrollWidth, iw: W, kde } };
+    }, { sels: JM_SELS, ovl: this.selektory[faze] || [] });
+    return { ok: r.ok, info: r.o };
+  },
+  fitNazev: "hra se vejde do rámu (bez posunu, žádný prvek neusekne spodní ani boční hrana iframe)",
+  ovladani(faze) { return this.selektory[faze] || []; },
+  async partie(A, B) {
+    const t0 = Date.now();
+    let mereno = 0;
+    while (Date.now() - t0 < 12 * 60 * 1000) {
+      const x = await jmKrok(A);
+      // iPhone (B) se při hře průběžně měří: výběr pasti (všechny tři karty), výsledek jamky, úder; každá fáze jednou
+      const s = await jmSt(B);
+      if (s && !s.busy && s.ph === "trap" && s.me && !s.pend[s.me] && !s.result && !B.jmFit.has("past")) {
+        B.jmFit.add("past");
+        await vejdeSe(B, "iPhone (výběr pasti)", "past");
+        for (const k of await B.f.evaluate(() => [...document.querySelectorAll("#dock .tc")].map((b) => b.dataset.k))) {
+          await B.f.evaluate((k) => document.querySelector(`#dock .tc[data-k="${k}"]`).click(), k); await sleep(300);
+          const r = await H.fit(B, "past"); mereno++;
+          check(`iPhone (past ${k}): ${H.fitNazev}`, r.ok, r.info);
+        }
+        await B.page.screenshot({ path: `${SHOTS}/mistnost-jamka-na-miru-past-iphone.png` });
+      } else if (s && s.result && !B.jmFit.has("vysledek")) {
+        B.jmFit.add("vysledek");
+        await vejdeSe(B, "iPhone (výsledek jamky)", "vysledek");
+        await B.page.screenshot({ path: `${SHOTS}/mistnost-jamka-na-miru-vysledek-iphone.png` });
+      } else if (s && !s.busy && s.ph === "play" && s.p === s.me && !B.jmFit.has("uder")) {
+        B.jmFit.add("uder");
+        await vejdeSe(B, "iPhone (úder)", "uder");
+        await B.page.screenshot({ path: `${SHOTS}/mistnost-jamka-na-miru-uder-iphone.png` });
+      }
+      const y = await jmKrok(B);
+      if (x && y && x.ph === "end" && y.ph === "end") break;
+      await sleep(250);
+    }
+    const [a, b] = [await jmSt(A), await jmSt(B)];
+    check("partie došla do konce na obou zařízeních se stejným skóre", !!a && !!b && a.ph === "end" && b.ph === "end" && JSON.stringify(a.sc) === JSON.stringify(b.sc), a && { s: (Date.now() - t0) / 1000 | 0, x: a.sc.x, o: a.sc.o });
+    for (const P of [A, B]) await P.f.waitForSelector("#bAgain", { timeout: 40000 }).catch(() => {}); // karta konce přijde až po výsledku poslední jamky
+    await sleep(800);
+    const sx = jmSoucet(a.sc.x), so = jmSoucet(a.sc.o);
+    const v = sx < so ? 0 : so < sx ? 1 : null;
+    console.log(`  (partie: ran x ${sx} / o ${so}, vítěz = ${v === null ? "remíza" : "sedadlo " + v}, ${mereno} měření karet pasti)`);
+    return v;
+  },
+  primarni: (P) => P.f.locator("#bAgain"),
+  sekundarni: (P) => P.f.locator("#bOther"),
+};
+JAMKA.fit = JAMKA.fit.bind(JAMKA);
+JAMKA.ovladani = JAMKA.ovladani.bind(JAMKA);
+
 // ───────────────────────── společné ─────────────────────────
 let H = null;
 // Stránka ve hře se nesmí posouvat a vybrané prvky musí být celé v rámu.
@@ -786,7 +883,7 @@ async function scenar(hra, URL_) {
 }
 
 (async () => {
-  const HRY = { psanicko: PSANICKO, caranice: CARANICE, "jezci-prak": JEZKOMET, jezkomet: JEZKOMET, mlask: MLASK, "ovocny-souboj": OVOCNY, kaficka: KAFICKA, tancicky: TANCICKY };
+  const HRY = { psanicko: PSANICKO, caranice: CARANICE, "jezci-prak": JEZKOMET, jezkomet: JEZKOMET, mlask: MLASK, "ovocny-souboj": OVOCNY, kaficka: KAFICKA, tancicky: TANCICKY, "jamka-na-miru": JAMKA };
   let URL_ = ZIVA;
   const ids = [];
   for (const arg of process.argv.slice(2)) {
@@ -794,7 +891,7 @@ async function scenar(hra, URL_) {
     else if (HRY[arg]) ids.push(arg);
     else { console.error(`Neznámý argument „${arg}“. Hry: ${Object.keys(HRY).join(", ")}, nebo URL Herny.`); process.exit(2); }
   }
-  if (!ids.length) ids.push("psanicko", "caranice", "jezci-prak", "mlask", "ovocny-souboj", "kaficka", "tancicky");
+  if (!ids.length) ids.push("psanicko", "caranice", "jezci-prak", "mlask", "ovocny-souboj", "kaficka", "tancicky", "jamka-na-miru");
   for (const id of ids) await scenar(HRY[id], URL_);
   console.log(`\nVÝSLEDEK: ${ok} PASS, ${fail} FAIL`);
   process.exit(fail ? 1 : 0);

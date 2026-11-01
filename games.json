@@ -137,12 +137,13 @@
       "barva": "#a6d98a",
       "typ": "tahová",
       "delka": "~10 min",
-      "stav": "brzy",
+      "stav": "hraj",
       "pravidla": [
         "Hrajete minigolf na střídačku, jamku po jamce.",
         "Před každou jamkou postavíš soupeři do dráhy past a on tobě taky.",
         "Vyhrává, kdo má po všech jamkách méně ran."
-      ]
+      ],
+      "solo": true
     },
     {
       "id": "ctyrka-s-otockou",
