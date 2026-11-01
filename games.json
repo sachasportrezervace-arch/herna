@@ -176,6 +176,22 @@
         "Čím blíž sázka skutečnému času, tím víc bodů."
       ],
       "solo": true
+    },
+    {
+      "id": "kostliva-noc",
+      "nazev": "Kostlivá noc",
+      "twist": "Hordy kostlivců u táboráku. Světelné pouto mezi vámi je pálí, tak se držte spolu.",
+      "ikona": "kostlivec",
+      "barva": "#a9b8d8",
+      "typ": "živá",
+      "delka": "~10 min",
+      "stav": "hraj",
+      "pravidla": [
+        "Každý ovládá svého hrdinu palcem, útočí se samo. Vydržte do svítání, v osm minut přijde Lich.",
+        "Mezi vámi svítí pouto a pálí kosti, které ho zkříží. Padlého kamaráda oživíš, když u něj chvíli postojíš.",
+        "Duše jsou společné. Na každé úrovni si každý vybere jedno vylepšení, bod do Herny bere ten, kdo rozbil víc kostí."
+      ],
+      "solo": true
     }
   ]
 }

@@ -90,6 +90,14 @@
       '<path d="M44 15.5 L54 22.5" stroke="' + K + '" stroke-width="3.2"/>' +
       '<path d="M48 10 L58 17 L61 12.5 Q62 9 58 6.5 L55 4.5 Q52 3 50 6 Z" fill="#f28aa0" ' + S + '/>' +
       '<path d="M24 44 L34 51 L22 56 Z" fill="#f6dcb6" ' + S + '/>',
+    // lebka se svítícíma očima nad ohníčkem
+    kostlivec:
+      '<path d="M22 54 Q32 46 42 54" fill="none" stroke="#f28c28" stroke-width="4" stroke-linecap="round"/>' +
+      '<path d="M32 8 C18 8 10 17 10 28 C10 35 13 39 18 42 V49 H46 V42 C51 39 54 35 54 28 C54 17 46 8 32 8 Z" fill="#f3ead8" ' + S + '/>' +
+      '<circle cx="23" cy="29" r="6.5" fill="' + K + '"/><circle cx="41" cy="29" r="6.5" fill="' + K + '"/>' +
+      '<circle cx="24" cy="29" r="2.6" fill="#86f3ff"/><circle cx="40" cy="29" r="2.6" fill="#86f3ff"/>' +
+      '<path d="M32 35 L29 40 H35 Z" fill="' + K + '"/>' +
+      '<path d="M26 49 V44 M32 49 V44 M38 49 V44" stroke="' + K + '" stroke-width="2.6" stroke-linecap="round"/>',
     // šipka do hry
     // putovní pohár: drží ho, kdo v místnosti vede
     pohar:

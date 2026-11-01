@@ -3,6 +3,13 @@
 PŘEVZATO 1. 11. – kolo vylepšení, session herna-kolo (rozcestník); jiná session sem nepíše.
 PŘEVZATO 31. 10. – dodělává session na účtu P, jiná session sem nepíše.
 
+## 2026-11-02 – nová hra Kostlivá noc (session kostliva-noc, Pracant)
+- Hotovo: `games.json` + ikona `kostlivec` v `ikony.js` (lebka se svítícíma očima nad ohníčkem), typ živá, ~10 min, sólo ano,
+  protokol Herny v1 (`<meta name="herna-protokol">`). Hra: https://sachasportrezervace-arch.github.io/kostliva-noc/
+- Ověřeno: `node tests/herna.cjs http://127.0.0.1:8790/` (lokální kopie) → 269 PASS, 0 FAIL; protokol hry ověřen
+  v `kostliva-noc/tests/duo.cjs herna` (iframe rámec, 1 vysledek na okno, stejné partie, jina-hra).
+- NEOVĚŘENO: `tests/mistnost-hry.cjs` Kostlivou noc zatím nezná (12. hra do místnosti nepřidána).
+
 ## 2026-11-01 – kolo vylepšení: souboj místnosti, Další hra, iPhone na šířku, všech 11 her
 - **Hotovo (c993b43, 59ee762, test 2d1b147):**
   - **Putovní pohár** nad číslem vedoucího (při remíze se houpe uprostřed, při změně vedení přejede).
